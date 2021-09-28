@@ -16,8 +16,8 @@ public class BotImpl implements Bot {
         botCommands.get(request);
     }
 
-    private void sayHello(){
-        System.out.println("Hello!");
+    public void sayHelloTo(String name){
+        System.out.println("Hello, "+name+"!");
     }
 
     private final Map<String, Void> botCommands = new HashMap<String, Void>(){};
