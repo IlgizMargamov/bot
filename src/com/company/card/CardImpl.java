@@ -5,13 +5,21 @@ public class CardImpl implements Card {
     public Rank CardRank;
 
     public CardImpl(){
-        CardSuit=Suit.NOT_STATED;
-        CardRank=Rank.NOT_STATED;
+        CardSuit=Suit.HIDDEN;
+        CardRank= Rank.HIDDEN;
     }
 
     public CardImpl(Suit suit, Rank rank){
-        if (suit==Suit.NOT_STATED || rank==Rank.NOT_STATED) throw new IllegalArgumentException();
+        if (suit==Suit.HIDDEN || rank== Rank.HIDDEN) throw new IllegalArgumentException();
         CardSuit=suit;
         CardRank=rank;
+    }
+
+    @Override
+    public String toString() {
+        return "CardImpl{" +
+                "CardSuit=" + CardSuit +
+                ", CardRank=" + CardRank +
+                '}';
     }
 }
