@@ -28,6 +28,9 @@ public class DeckImpl implements Deck {
                 if (cardCount == 36) {
                     if (rank.ordinal() < 5) continue;
                 }
+                if (cardCount == 24){
+                    if (rank.ordinal() < 8) continue;
+                }
                 deck[i] = new CardImpl(suit, rank);
                 i++;
             }
