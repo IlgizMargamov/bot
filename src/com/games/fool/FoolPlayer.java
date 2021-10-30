@@ -1,8 +1,6 @@
 package com.games.fool;
 
-import com.common.player.Player;
-import com.common.card.Card;
+import com.common.player.BasePlayer;
 
-public class FoolPlayer implements Player {
-    private Card[] cards;
+public class FoolPlayer extends BasePlayer {
 }
