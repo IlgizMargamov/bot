@@ -3,7 +3,7 @@ package com.common;
 import com.blackjack.BlackJackLogic;
 import com.fool.FoolLogic;
 
-public class Logic {
+public class LogicFactory {
     public static BaseGameLogic getGameLogic(String gameLogic) {
         String game = gameLogic.toUpperCase();
         if (game.startsWith("F")){
