@@ -4,4 +4,8 @@ import com.common.table.Table;
 
 public abstract class BaseGameLogic implements GameLogic {
     private Table table;
+
+    public void game(){
+        table.giveCardsToPlayers();
+    }
 }

@@ -5,37 +5,53 @@ import com.common.card.Rank;
 import com.common.card.Suit;
 import com.common.card.CardImpl;
 
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class Deck {
-    public Card[] Cards;
-    private Shuffler shuffler;
+    public List<Card> Cards;
 
+    public Deck(DeckType deckType){
+        if (deckType.getCardsCount()==24){
+            Cards=getSortedDeck(24);
+        } else if(deckType.getCardsCount()==36){
+            Cards=getSortedDeck(36);
+        } else if(deckType.getCardsCount()==52){
+            Cards=getSortedDeck(52);
+        }
+
+        assert Cards != null;
+        shuffle(Cards);
+    }
 
     @Override
     public String toString() {
         return "DeckImpl{" +
-                "Cards=" + Arrays.toString(Cards) +
+                "Cards=" + Cards.toString() +
                 '}';
     }
 
-    private Card[] getSortedDeck(/*int cardCount*/) {
-        int cardCount=36; // may be 52, 24
-        Card[] deck = new Card[cardCount];
+    private void shuffle(List<Card> cards){
+        Collections.shuffle(cards);
+    }
+
+    private List<Card> getSortedDeck(int length) {
+        List<Card> cards=new ArrayList<Card>(length);
         int i = 0;
         for (Suit suit : Suit.values()) {
             if (suit == Suit.HIDDEN) continue;
             for (Rank rank : Rank.values()) {
                 if (rank == Rank.HIDDEN) continue;
 
-                if (checkCardDeckConditions(cardCount, 36, rank.ordinal(), 5)) continue;
-                if (checkCardDeckConditions(cardCount, 24, rank.ordinal(), 8)) continue;
+                if (checkCardDeckConditions(length, 36, rank.ordinal(), 5)) continue;
+                if (checkCardDeckConditions(length, 24, rank.ordinal(), 8)) continue;
 
-                deck[i] = new CardImpl(suit, rank);
+                cards.add(new CardImpl(suit, rank));
                 i++;
             }
         }
-        return deck;
+        return cards;
     }
 
     private boolean checkCardDeckConditions(int cardCount, int exceptionalCardCount, int rankOrdinal, int cardCountControl){
