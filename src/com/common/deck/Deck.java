@@ -13,12 +13,13 @@ public class Deck {
     public List<Card> Cards;
 
     public Deck(DeckType deckType){
-        if (deckType.getCardsCount()==24){
-            Cards=getSortedDeck(24);
-        } else if(deckType.getCardsCount()==36){
-            Cards=getSortedDeck(36);
-        } else if(deckType.getCardsCount()==52){
-            Cards=getSortedDeck(52);
+        int cardsCount = deckType.getCardsCount();
+        if (cardsCount ==24){
+            Cards=getSortedDeck(cardsCount);
+        } else if(cardsCount ==36){
+            Cards=getSortedDeck(cardsCount);
+        } else if(cardsCount ==52){
+            Cards=getSortedDeck(cardsCount);
         }
 
         assert Cards != null;
