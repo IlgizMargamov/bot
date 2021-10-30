@@ -1,4 +1,4 @@
-package com.company.card;
+package com.card;
 
 public enum Rank {
     HIDDEN,

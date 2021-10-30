@@ -1,27 +1,22 @@
-package com.company;
+package com.common;
 
-import com.company.card.*;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+import com.card.Card;
+import com.card.Rank;
+import com.card.Suit;
+import com.card.CardImpl;
 
 import java.util.Arrays;
 
-public class DeckImpl implements Deck {
+public class Deck {
     public Card[] Cards;
+    private Shuffler shuffler;
 
-    public DeckImpl(/*int cardCount*/) {
-        Cards = getSortedDeck(/*cardCount*/);
-    }
 
     @Override
     public String toString() {
         return "DeckImpl{" +
                 "Cards=" + Arrays.toString(Cards) +
                 '}';
-    }
-
-    private Card[] getShuffledDeck(Shuffler shuffler){
-        // TODO
-        throw new NotImplementedException();
     }
 
     private Card[] getSortedDeck(/*int cardCount*/) {

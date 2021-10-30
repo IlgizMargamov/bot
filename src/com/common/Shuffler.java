@@ -1,6 +1,6 @@
-package com.company;
+package com.common;
 
-import com.company.card.Card;
+import com.card.Card;
 
 public interface Shuffler {
     Card[] shuffle(Card[] cards);
