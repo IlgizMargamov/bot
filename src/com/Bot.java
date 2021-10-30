@@ -1,7 +1,7 @@
 package com;
 
-import com.common.GameLogic;
-import com.common.Player;
+import com.common.gamelogic.GameLogic;
+import com.common.player.Player;
 
 public class Bot {
     private GameLogic m_gameLogic;

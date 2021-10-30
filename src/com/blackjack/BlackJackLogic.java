@@ -1,6 +1,6 @@
 package com.blackjack;
 
-import com.common.BaseGameLogic;
+import com.common.gamelogic.BaseGameLogic;
 
 public class BlackJackLogic extends BaseGameLogic {
 }

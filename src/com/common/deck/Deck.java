@@ -1,4 +1,4 @@
-package com.common;
+package com.common.deck;
 
 import com.card.Card;
 import com.card.Rank;

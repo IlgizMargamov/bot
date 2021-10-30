@@ -1,6 +1,7 @@
-package com.common;
+package com.common.gamelogic;
 
 import com.blackjack.BlackJackLogic;
+import com.common.gamelogic.BaseGameLogic;
 import com.fool.FoolLogic;
 
 public class LogicFactory {

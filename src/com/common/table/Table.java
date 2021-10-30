@@ -1,4 +1,4 @@
-package com.common;
+package com.common.table;
 
 public interface Table {
 }
