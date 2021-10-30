@@ -1,7 +1,7 @@
-package com.fool;
+package com.games.fool;
 
 import com.common.player.Player;
-import com.card.Card;
+import com.common.card.Card;
 
 public class FoolPlayer implements Player {
     private Card[] cards;

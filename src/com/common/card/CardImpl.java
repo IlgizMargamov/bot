@@ -1,4 +1,4 @@
-package com.card;
+package com.common.card;
 
 public class CardImpl implements Card {
     public Suit CardSuit;

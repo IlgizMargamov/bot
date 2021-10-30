@@ -1,4 +1,4 @@
-package com.card;
+package com.common.card;
 
 public enum Suit {
     HIDDEN,

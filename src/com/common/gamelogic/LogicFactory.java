@@ -1,8 +1,7 @@
 package com.common.gamelogic;
 
-import com.blackjack.BlackJackLogic;
-import com.common.gamelogic.BaseGameLogic;
-import com.fool.FoolLogic;
+import com.games.blackjack.BlackJackLogic;
+import com.games.fool.FoolLogic;
 
 public class LogicFactory {
     public static BaseGameLogic getGameLogic(String gameLogic) {

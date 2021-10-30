@@ -1,9 +1,9 @@
 package com.common.deck;
 
-import com.card.Card;
-import com.card.Rank;
-import com.card.Suit;
-import com.card.CardImpl;
+import com.common.card.Card;
+import com.common.card.Rank;
+import com.common.card.Suit;
+import com.common.card.CardImpl;
 
 import java.util.Arrays;
 

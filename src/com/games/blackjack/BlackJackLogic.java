@@ -1,4 +1,4 @@
-package com.blackjack;
+package com.games.blackjack;
 
 import com.common.gamelogic.BaseGameLogic;
 

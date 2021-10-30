@@ -1,4 +1,4 @@
-package com.fool;
+package com.games.fool;
 
 import com.common.table.BaseTable;
 
