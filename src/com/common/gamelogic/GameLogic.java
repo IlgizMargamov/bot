@@ -1,5 +1,10 @@
 package com.common.gamelogic;
 
-public interface GameLogic {
+import com.common.player.Player;
 
+public interface GameLogic {
+    Player defineFirstPlayer(Player[] players);
+    void checkMoveCorrectness();
+    void defineCardCountPerPlayer();
+    void defineWinner();
 }

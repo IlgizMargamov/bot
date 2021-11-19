@@ -1,11 +1,15 @@
 package com.common.table;
 
-public class BaseTable implements Table {
+import com.common.gamelogic.GameLogic;
+import com.common.player.Player;
 
+public class BaseTable implements Table {
+    private GameLogic baseGameLogic;
+    private Player[] players;
 
     @Override
     public void giveCardsToPlayers() {
-
+        Player firstPlayer=baseGameLogic.defineFirstPlayer(players);
     }
 
     @Override

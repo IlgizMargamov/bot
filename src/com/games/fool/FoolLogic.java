@@ -5,7 +5,8 @@ import com.common.deck.DeckType;
 import com.common.gamelogic.BaseGameLogic;
 
 public class FoolLogic extends BaseGameLogic {
-    public FoolLogic() {
-        //new Deck(DeckType.BIG)
+
+    public FoolLogic(Deck deck) {
+        super(deck);
     }
 }
