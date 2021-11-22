@@ -26,12 +26,12 @@ public class Deck {
                 '}';
     }
 
-    private void shuffle(List<Card> cards) {
+    private void shuffle(List<Card> cards){
         Collections.shuffle(cards);
     }
 
     private List<Card> getSortedDeck(int length) {
-        List<Card> cards = new ArrayList<Card>(length);
+        List<Card> cards=new ArrayList<Card>(length);
         int i = 0;
         for (Suit suit : Suit.values()) {
             if (suit == Suit.HIDDEN) continue;
@@ -48,16 +48,22 @@ public class Deck {
         return cards;
     }
 
+    public Card GiveNext(){
+        Card card = Cards.get(Cards.size()-1);
+        Cards.remove(Cards.size()-1);
+        return card;
+    }
+
     private boolean checkCardDeckConditions(int cardCount, int exceptionalCardCount, int rankOrdinal, int cardCountControl) {
         return isCardCountExceptional(cardCount, exceptionalCardCount) &&
                 isOrdinalBigEnough(rankOrdinal, cardCountControl);
     }
 
-    private boolean isCardCountExceptional(int cardCount, int exceptionalCardCount) {
+    private boolean isCardCountExceptional(int cardCount, int exceptionalCardCount){
         return cardCount == exceptionalCardCount;
     }
 
-    private boolean isOrdinalBigEnough(int cardOrdinal, int cardOrdinalControl) {
+    private boolean isOrdinalBigEnough(int cardOrdinal, int cardOrdinalControl){
         return cardOrdinal < cardOrdinalControl;
     }
 }
