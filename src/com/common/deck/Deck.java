@@ -12,14 +12,14 @@ import java.util.List;
 public class Deck {
     public List<Card> Cards;
 
-    public Deck(DeckType deckType){
+    public Deck(DeckType deckType) {
         int cardsCount = deckType.getCardsCount();
-        if (cardsCount ==24){
-            Cards=getSortedDeck(cardsCount);
-        } else if(cardsCount ==36){
-            Cards=getSortedDeck(cardsCount);
-        } else if(cardsCount ==52){
-            Cards=getSortedDeck(cardsCount);
+        if (cardsCount == 24) {
+            Cards = getSortedDeck(cardsCount);
+        } else if (cardsCount == 36) {
+            Cards = getSortedDeck(cardsCount);
+        } else if (cardsCount == 52) {
+            Cards = getSortedDeck(cardsCount);
         }
 
         assert Cards != null;
@@ -33,12 +33,12 @@ public class Deck {
                 '}';
     }
 
-    private void shuffle(List<Card> cards){
+    public void shuffle(List<Card> cards) {
         Collections.shuffle(cards);
     }
 
     private List<Card> getSortedDeck(int length) {
-        List<Card> cards=new ArrayList<Card>(length);
+        List<Card> cards = new ArrayList<Card>(length);
         int i = 0;
         for (Suit suit : Suit.values()) {
             if (suit == Suit.HIDDEN) continue;
@@ -55,16 +55,22 @@ public class Deck {
         return cards;
     }
 
-    private boolean checkCardDeckConditions(int cardCount, int exceptionalCardCount, int rankOrdinal, int cardCountControl){
+    public Card GiveNext(){
+        Card card = Cards.get(Cards.size()-1);
+        Cards.remove(Cards.size()-1);
+        return card;
+    }
+
+    private boolean checkCardDeckConditions(int cardCount, int exceptionalCardCount, int rankOrdinal, int cardCountControl) {
         return isCardCountExceptional(cardCount, exceptionalCardCount) &&
                 isOrdinalBigEnough(rankOrdinal, cardCountControl);
     }
 
-    private boolean isCardCountExceptional(int cardCount, int exceptionalCardCount){
+    private boolean isCardCountExceptional(int cardCount, int exceptionalCardCount) {
         return cardCount == exceptionalCardCount;
     }
 
-    private boolean isOrdinalBigEnough(int cardOrdinal, int cardOrdinalControl){
+    private boolean isOrdinalBigEnough(int cardOrdinal, int cardOrdinalControl) {
         return cardOrdinal < cardOrdinalControl;
     }
 }
