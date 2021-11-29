@@ -1,12 +1,16 @@
 package com.common.gamelogic;
 
 import com.common.deck.Deck;
+import com.common.player.BasePlayer;
 import com.common.player.Player;
 
 public abstract class BaseGameLogic implements GameLogic {
 
-    public BaseGameLogic(Deck deck){
+    public BaseGameLogic(BasePlayer[] players, Deck deck){
 
+    }
+
+    protected BaseGameLogic() {
     }
 
     @Override

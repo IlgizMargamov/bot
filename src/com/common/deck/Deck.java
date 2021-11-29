@@ -1,6 +1,5 @@
 package com.common.deck;
 
-import com.common.card.Card;
 import com.common.card.CardImpl;
 import com.common.card.Rank;
 import com.common.card.Suit;
@@ -10,7 +9,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class Deck {
-    public List<Card> Cards;
+    private List<CardImpl> Cards;
 
     public Deck(DeckType deckType) {
         int cardsCount = deckType.getCardsCount();
@@ -26,12 +25,12 @@ public class Deck {
                 '}';
     }
 
-    private void shuffle(List<Card> cards){
+    private void shuffle(List<CardImpl> cards){
         Collections.shuffle(cards);
     }
 
-    private List<Card> getSortedDeck(int length) {
-        List<Card> cards=new ArrayList<Card>(length);
+    private List<CardImpl> getSortedDeck(int length) {
+        List<CardImpl> cards= new ArrayList<>(length);
         int i = 0;
         for (Suit suit : Suit.values()) {
             if (suit == Suit.HIDDEN) continue;
@@ -48,10 +47,14 @@ public class Deck {
         return cards;
     }
 
-    public Card GiveNext(){
-        Card card = Cards.get(Cards.size()-1);
+    public CardImpl GiveNext(){
+        CardImpl card = Cards.get(Cards.size()-1);
         Cards.remove(Cards.size()-1);
         return card;
+    }
+
+    public boolean isEmpty(){
+        return Cards.size() == 0;
     }
 
     private boolean checkCardDeckConditions(int cardCount, int exceptionalCardCount, int rankOrdinal, int cardCountControl) {
