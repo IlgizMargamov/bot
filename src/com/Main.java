@@ -2,8 +2,8 @@ package com;
 
 import com.common.deck.Deck;
 import com.common.deck.DeckType;
-import com.games.fool.FoolPlayer;
-import com.games.fool.foolLogic;
+import com.games.OneHundred.OneHundredLogic;
+import com.games.OneHundred.OneHundredPlayer;
 
 
 public class Main {
@@ -21,10 +21,10 @@ public class Main {
 //
 //        bot.start();
 
-        FoolPlayer player1 = new FoolPlayer();
-        FoolPlayer player2 = new FoolPlayer();
-        var players = new FoolPlayer[]{player1,player2};
-        foolLogic game = new foolLogic(players,new Deck(DeckType.MEDIUM));
+        OneHundredPlayer player1 = new OneHundredPlayer();
+        OneHundredPlayer player2 = new OneHundredPlayer();
+        var players = new OneHundredPlayer[]{player1,player2};
+        OneHundredLogic game = new OneHundredLogic(players,new Deck(DeckType.MEDIUM));
         game.StartGame();
     }
 

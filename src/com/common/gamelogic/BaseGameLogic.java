@@ -6,8 +6,12 @@ import com.common.player.Player;
 
 public abstract class BaseGameLogic implements GameLogic {
 
-    public BaseGameLogic(BasePlayer[] players, Deck deck){
+    protected Deck deck;
+    BasePlayer[] players;
 
+    public BaseGameLogic(BasePlayer[] players, Deck deck) {
+        this.deck = deck;
+        this.players = players;
     }
 
     protected BaseGameLogic() {

@@ -14,8 +14,12 @@ public class Deck {
     public Deck(DeckType deckType) {
         int cardsCount = deckType.getCardsCount();
         Cards = getSortedDeck(cardsCount);
-
         shuffle(Cards);
+    }
+
+    public Deck(List<CardImpl> oldDeck){
+        this.Cards = oldDeck;
+        shuffle(this.Cards);
     }
 
     @Override

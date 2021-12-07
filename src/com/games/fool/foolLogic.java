@@ -11,7 +11,6 @@ import java.util.Scanner;
 public class foolLogic extends BaseGameLogic {
 
     Deck deck;
-    //int currentPlayer = 0;
     FoolPlayer[] players;
     ArrayList<Tuple> table;
     CardImpl trump;
@@ -81,7 +80,7 @@ public class foolLogic extends BaseGameLogic {
     }
 
     private ArrayList<CardImpl> CreateHand(int count) {
-        ArrayList<CardImpl> hand = new ArrayList<>();
+        ArrayList<CardImpl> hand = new ArrayList<CardImpl>();
         for (int i = 0; i < count; i++) {
             hand.add(deck.GiveNext());
         }
@@ -265,7 +264,7 @@ public class foolLogic extends BaseGameLogic {
             }
         }
 
-        @Override
+
         public String toString() {
             if (second == null) return first.cardSuitAndRank() + " \\ " + "Nothing";
             return first.cardSuitAndRank() + " \\ " + second.cardSuitAndRank();
