@@ -21,9 +21,9 @@ public class FoolLogic extends BaseGameLogic {
         this.players = players;
         this.deck = deck;
         giveCardToPlayers();
-        table = new ArrayList<>();
-        uncoveredCard = 0;
-        deckEmpty = false;
+        this.table = new ArrayList<>();
+        this.uncoveredCard = 0;
+        this.deckEmpty = false;
     }
 
     public void startGame() {
@@ -59,7 +59,7 @@ public class FoolLogic extends BaseGameLogic {
     }
 
     private int chooseFirst() {
-        trump = deck.GiveNext();
+        trump = deck.giveNext();
         CardImpl minCard = new CardImpl(trump.CardSuit, Rank.ACE);
         int firstPlayer = 0;
         for (int i = 0; i < players.length; i++) {
@@ -82,7 +82,7 @@ public class FoolLogic extends BaseGameLogic {
     private ArrayList<CardImpl> createHand(int count) {
         ArrayList<CardImpl> hand = new ArrayList<>();
         for (int i = 0; i < count; i++) {
-            hand.add(deck.GiveNext());
+            hand.add(deck.giveNext());
         }
         return hand;
     }
@@ -113,7 +113,7 @@ public class FoolLogic extends BaseGameLogic {
                     player.TakeCard(trump);
                     break;
                 }
-                player.TakeCard(deck.GiveNext());
+                player.TakeCard(deck.giveNext());
             }
         }
     }

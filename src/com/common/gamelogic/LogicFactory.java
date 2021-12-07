@@ -1,9 +1,11 @@
 package com.common.gamelogic;
 
 import com.common.deck.Deck;
-import com.games.blackjack.BlackJackLogic;
 import com.games.fool.FoolPlayer;
 import com.games.fool.FoolLogic;
+import com.games.pharaoh.PharaohLogic;
+import com.games.pharaoh.PharaohPlayer;
+
 //TODO: Remake Factory
 public class LogicFactory {
     public static BaseGameLogic getGameLogic(String gameLogic, Deck deck) {
@@ -13,8 +15,8 @@ public class LogicFactory {
             return new FoolLogic(new FoolPlayer[2],deck);
         }
 
-        if (game.startsWith("B")){
-            return new BlackJackLogic(deck);
+        if (game.startsWith("P")){
+            return new PharaohLogic(new PharaohPlayer[2], deck);
         }
 
         return null;
