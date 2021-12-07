@@ -8,7 +8,7 @@ import com.common.gamelogic.BaseGameLogic;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-public class foolLogic extends BaseGameLogic {
+public class FoolLogic extends BaseGameLogic {
 
     Deck deck;
     FoolPlayer[] players;
@@ -17,19 +17,19 @@ public class foolLogic extends BaseGameLogic {
     int uncoveredCard;
     boolean deckEmpty;
 
-    public foolLogic(FoolPlayer[] players, Deck deck) {
+    public FoolLogic(FoolPlayer[] players, Deck deck) {
         this.players = players;
         this.deck = deck;
-        GiveCardToPlayers();
+        giveCardToPlayers();
         table = new ArrayList<>();
         uncoveredCard = 0;
         deckEmpty = false;
     }
 
-    public void StartGame() {
+    public void startGame() {
         int currentTurn = chooseFirst();
         while (true) {
-            boolean lose = MakeSet(currentTurn);
+            boolean lose = makeSet(currentTurn);
             if (lose) {
                 currentTurn += 2;
                 continue;
@@ -73,21 +73,21 @@ public class foolLogic extends BaseGameLogic {
         return firstPlayer;
     }
 
-    private void GiveCardToPlayers() {
+    private void giveCardToPlayers() {
         for (FoolPlayer player : players) {
-            player.TakeHand(CreateHand(6));
+            player.TakeHand(createHand(6));
         }
     }
 
-    private ArrayList<CardImpl> CreateHand(int count) {
-        ArrayList<CardImpl> hand = new ArrayList<CardImpl>();
+    private ArrayList<CardImpl> createHand(int count) {
+        ArrayList<CardImpl> hand = new ArrayList<>();
         for (int i = 0; i < count; i++) {
             hand.add(deck.GiveNext());
         }
         return hand;
     }
 
-    private boolean MakeSet(int firstPlayer) {
+    private boolean makeSet(int firstPlayer) {
         int attackPlayer1 = firstPlayer;
         int attackPlayer2 = (firstPlayer + 2) % players.length;
         int defendPlayer = firstPlayer + 1;
@@ -131,9 +131,7 @@ public class foolLogic extends BaseGameLogic {
             Scanner scanner = new Scanner(System.in);
             String command = scanner.nextLine();
             switch (command) {
-                case "1" -> {
-                    players[currentPlayer].ShowHand();
-                }
+                case "1" -> players[currentPlayer].ShowHand();
                 case "2" -> {
                     if (table.size() == 0) {
                         System.out.println("Table is empty");
@@ -151,7 +149,7 @@ public class foolLogic extends BaseGameLogic {
                     int numberOfCardOnHand = Integer.parseInt(scanner.nextLine()) - 1;
                     if (numberOfCardOnHand == -1) continue;
                     CardImpl playerCard = players[currentPlayer].hand.get(numberOfCardOnHand);
-                    if (!possibleTurn(playerCard)) {
+                    if (!isPossibleTurn(playerCard)) {
                         System.out.println("Try another card");
                         continue;
                     }
@@ -189,17 +187,13 @@ public class foolLogic extends BaseGameLogic {
             Scanner scanner = new Scanner(System.in);
             String command = scanner.nextLine();
             switch (command) {
-                case "1" -> {
-                    players[currentPlayer].ShowHand();
-                }
+                case "1" -> players[currentPlayer].ShowHand();
                 case "2" -> {
                     for (Tuple card : table) {
                         System.out.println(card.toString());
                     }
                 }
-                case "3" -> {
-                    System.out.println(trump.cardSuitAndRank());
-                }
+                case "3" -> System.out.println(trump.cardSuitAndRank());
                 case "4" -> {
                     System.out.println("What card you want to throw?");
                     players[currentPlayer].ShowHand();
@@ -231,7 +225,7 @@ public class foolLogic extends BaseGameLogic {
         }
     }
 
-    private boolean possibleTurn(CardImpl card) {
+    private boolean isPossibleTurn(CardImpl card) {
         if (table.size() == 0) return true;
         for (Tuple tuple : table) {
             if (tuple.first.CardRank == card.CardRank ||
