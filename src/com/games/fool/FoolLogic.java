@@ -16,6 +16,7 @@ public class FoolLogic extends BaseGameLogic {
     CardImpl trump;
     int uncoveredCard;
     boolean deckEmpty;
+    boolean trumpGiven;
 
     public FoolLogic(FoolPlayer[] players, Deck deck) {
         this.players = players;
@@ -28,13 +29,12 @@ public class FoolLogic extends BaseGameLogic {
 
     public void startGame() {
         int currentTurn = chooseFirst();
+        trumpGiven = false;
         while (true) {
             boolean lose = makeSet(currentTurn);
-            if (lose) {
-                currentTurn += 2;
-                continue;
-            }
-            currentTurn++;
+            if (lose) currentTurn += 2;
+            else currentTurn++;
+            table.clear();
             int count = checkEnd();
             if(count == 0){
                 System.out.println("Tie!");
@@ -88,20 +88,18 @@ public class FoolLogic extends BaseGameLogic {
     }
 
     private boolean makeSet(int firstPlayer) {
-        int attackPlayer1 = firstPlayer;
         int attackPlayer2 = (firstPlayer + 2) % players.length;
-        int defendPlayer = firstPlayer + 1;
+        int defendPlayer = (firstPlayer + 1) % players.length;
         boolean end;
-        attackTurn(false, attackPlayer1);
+        attackTurn(false, firstPlayer);
         while (true) {
-            firstPlayer++;
             end = defendTurn(defendPlayer);
+            attackTurn(true, firstPlayer);
+            if (firstPlayer != attackPlayer2) attackTurn(true, attackPlayer2);
             if (end) break;
-            attackTurn(true, attackPlayer1);
-            if (attackPlayer1 != attackPlayer2) attackTurn(true, attackPlayer2);
             if (uncoveredCard == 0) break;
         }
-        if (!deckEmpty) giveAllToSix();
+        if (!deckEmpty || !trumpGiven) giveAllToSix();
         return end;
     }
 
@@ -111,6 +109,7 @@ public class FoolLogic extends BaseGameLogic {
                 if (deck.isEmpty()) {
                     deckEmpty = true;
                     player.TakeCard(trump);
+                    trumpGiven = true;
                     break;
                 }
                 player.TakeCard(deck.giveNext());
