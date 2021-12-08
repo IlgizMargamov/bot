@@ -11,16 +11,17 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMar
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 public class TelegramBot extends TelegramLongPollingBot {
-    public List<FoolPlayer> playerList=new ArrayList<>();
+    public static String input;
+    public static String output;
+    public Map<String, String> playerNameToChatId;
     public FoolLogic gameLogic;
     private List<Lobby> lobbies=new ArrayList<>();
     private final String token = "5008512617:AAELuxvMo_D0hg1C8pHiRN52NYWhewlHgAw";
     private final String botUsername = "Card Games";
+
 
     @Override
     public String getBotUsername() {
@@ -63,16 +64,13 @@ public class TelegramBot extends TelegramLongPollingBot {
                 }
             } else if (messageFromInput.startsWith(createLobbyFoolCommand.substring(0, 10))) {
                 String[] strings = messageFromInput.split("_");
-                String pin = "#" + Integer.toHexString(new Random().nextInt(10000, 99999));
+                Random random=new Random();
+                String pin = "#" + Integer.toHexString(random.nextInt(100000));
                 String creator = currentUser;
                 if (strings[strings.length - 1].equals("fool")) {
-                    playerList = new ArrayList<>();
-
-                    FoolPlayer player = new FoolPlayer();
-                    player.name = currentUser;
-
-                    playerList.add(player);
-                    lobbies.add(new Lobby(creator, pin, playerList));
+                    playerNameToChatId = new HashMap<>();
+                    playerNameToChatId.put(creator, chatId);
+                    lobbies.add(new Lobby(creator, pin, playerNameToChatId));
                     try {
                         execute(SendMessage.builder().chatId(chatId).text("@" + creator + ", tell your friends to get to this bot and enter following pin: " + pin).build());
                     } catch (TelegramApiException e) {
@@ -84,9 +82,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                 String friendName = "";
                 for (Lobby lobby : lobbies) {
                     if (lobby.m_pin.equals(messageFromInput)) {
-                        FoolPlayer player = new FoolPlayer();
-                        player.name = currentUser;
-                        lobby.m_playerList.add(player);
+                        lobby.m_playerNameToChatId.put(currentUser,chatId);
                         isSuccessful = true;
                         friendName = lobby.m_creator;
                         break;
@@ -104,11 +100,12 @@ public class TelegramBot extends TelegramLongPollingBot {
                     e.printStackTrace();
                 }
             } else if (messageFromInput.equals(startGame)) {
-                int size = playerList.size();
+                int size = playerNameToChatId.size();
                 if (size < 5) {
                     FoolPlayer[] players = new FoolPlayer[size];
                     for (int i = 0; i < size; i++) {
-                        players[i] = playerList.get(i);
+                        Object[] playersName = playerNameToChatId.keySet().toArray();
+                        players[i] = new FoolPlayer(playersName[i].toString());
                     }
                     //PharaohLogic game = new PharaohLogic(players, new Deck(DeckType.MEDIUM));
                     FoolLogic game = new FoolLogic(players, new Deck(DeckType.MEDIUM));
