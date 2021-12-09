@@ -8,7 +8,7 @@ import com.common.gamelogic.BaseGameLogic;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-public class foolLogic extends BaseGameLogic {
+public class FoolLogic extends BaseGameLogic {
 
     Deck deck;
     FoolPlayer[] players;
@@ -16,25 +16,25 @@ public class foolLogic extends BaseGameLogic {
     CardImpl trump;
     int uncoveredCard;
     boolean deckEmpty;
+    boolean trumpGiven;
 
-    public foolLogic(FoolPlayer[] players, Deck deck) {
+    public FoolLogic(FoolPlayer[] players, Deck deck) {
         this.players = players;
         this.deck = deck;
-        GiveCardToPlayers();
-        table = new ArrayList<>();
-        uncoveredCard = 0;
-        deckEmpty = false;
+        giveCardToPlayers();
+        this.table = new ArrayList<>();
+        this.uncoveredCard = 0;
+        this.deckEmpty = false;
     }
 
     public void StartGame() {
         int currentTurn = chooseFirst();
+        trumpGiven = false;
         while (true) {
-            boolean lose = MakeSet(currentTurn);
-            if (lose) {
-                currentTurn += 2;
-                continue;
-            }
-            currentTurn++;
+            boolean lose = makeSet(currentTurn);
+            if (lose) currentTurn += 2;
+            else currentTurn++;
+            table.clear();
             int count = checkEnd();
             if(count == 0){
                 System.out.println("Tie!");
@@ -73,35 +73,33 @@ public class foolLogic extends BaseGameLogic {
         return firstPlayer;
     }
 
-    private void GiveCardToPlayers() {
+    private void giveCardToPlayers() {
         for (FoolPlayer player : players) {
-            player.TakeHand(CreateHand(6));
+            player.TakeHand(createHand(6));
         }
     }
 
-    private ArrayList<CardImpl> CreateHand(int count) {
-        ArrayList<CardImpl> hand = new ArrayList<CardImpl>();
+    private ArrayList<CardImpl> createHand(int count) {
+        ArrayList<CardImpl> hand = new ArrayList<>();
         for (int i = 0; i < count; i++) {
             hand.add(deck.GiveNext());
         }
         return hand;
     }
 
-    private boolean MakeSet(int firstPlayer) {
-        int attackPlayer1 = firstPlayer;
+    private boolean makeSet(int firstPlayer) {
         int attackPlayer2 = (firstPlayer + 2) % players.length;
-        int defendPlayer = firstPlayer + 1;
+        int defendPlayer = (firstPlayer + 1) % players.length;
         boolean end;
-        attackTurn(false, attackPlayer1);
+        attackTurn(false, firstPlayer);
         while (true) {
-            firstPlayer++;
             end = defendTurn(defendPlayer);
+            attackTurn(true, firstPlayer);
+            if (firstPlayer != attackPlayer2) attackTurn(true, attackPlayer2);
             if (end) break;
-            attackTurn(true, attackPlayer1);
-            if (attackPlayer1 != attackPlayer2) attackTurn(true, attackPlayer2);
             if (uncoveredCard == 0) break;
         }
-        if (!deckEmpty) giveAllToSix();
+        if (!deckEmpty || !trumpGiven) giveAllToSix();
         return end;
     }
 
@@ -111,6 +109,7 @@ public class foolLogic extends BaseGameLogic {
                 if (deck.isEmpty()) {
                     deckEmpty = true;
                     player.TakeCard(trump);
+                    trumpGiven = true;
                     break;
                 }
                 player.TakeCard(deck.GiveNext());
@@ -131,9 +130,7 @@ public class foolLogic extends BaseGameLogic {
             Scanner scanner = new Scanner(System.in);
             String command = scanner.nextLine();
             switch (command) {
-                case "1" -> {
-                    players[currentPlayer].ShowHand();
-                }
+                case "1" -> players[currentPlayer].ShowHand();
                 case "2" -> {
                     if (table.size() == 0) {
                         System.out.println("Table is empty");
@@ -151,7 +148,7 @@ public class foolLogic extends BaseGameLogic {
                     int numberOfCardOnHand = Integer.parseInt(scanner.nextLine()) - 1;
                     if (numberOfCardOnHand == -1) continue;
                     CardImpl playerCard = players[currentPlayer].hand.get(numberOfCardOnHand);
-                    if (!possibleTurn(playerCard)) {
+                    if (!isPossibleTurn(playerCard)) {
                         System.out.println("Try another card");
                         continue;
                     }
@@ -189,17 +186,13 @@ public class foolLogic extends BaseGameLogic {
             Scanner scanner = new Scanner(System.in);
             String command = scanner.nextLine();
             switch (command) {
-                case "1" -> {
-                    players[currentPlayer].ShowHand();
-                }
+                case "1" -> players[currentPlayer].ShowHand();
                 case "2" -> {
                     for (Tuple card : table) {
                         System.out.println(card.toString());
                     }
                 }
-                case "3" -> {
-                    System.out.println(trump.cardSuitAndRank());
-                }
+                case "3" -> System.out.println(trump.cardSuitAndRank());
                 case "4" -> {
                     System.out.println("What card you want to throw?");
                     players[currentPlayer].ShowHand();
@@ -231,7 +224,7 @@ public class foolLogic extends BaseGameLogic {
         }
     }
 
-    private boolean possibleTurn(CardImpl card) {
+    private boolean isPossibleTurn(CardImpl card) {
         if (table.size() == 0) return true;
         for (Tuple tuple : table) {
             if (tuple.first.CardRank == card.CardRank ||
