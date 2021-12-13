@@ -9,8 +9,10 @@ public class BasePlayer implements Player {
     public ArrayList<CardImpl> hand;
     public String name;
 
-    public BasePlayer(){
+    public BasePlayer(String name){
+        this.name = name;
     }
+    public BasePlayer(){}
 
     public void TakeHand(ArrayList<CardImpl> cards) {
         this.hand = cards;

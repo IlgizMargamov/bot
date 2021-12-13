@@ -1,41 +1,39 @@
-package com.games.OneHundred;
+package com.games.pharaoh;
 
 import com.common.card.CardImpl;
 import com.common.card.Rank;
 import com.common.card.Suit;
 import com.common.deck.Deck;
 import com.common.gamelogic.BaseGameLogic;
+import com.common.player.BasePlayer;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Scanner;
 
-public class OneHundredLogic extends BaseGameLogic {
+//TODO: Fix bug with 6
+//TODO: Score between set
 
-    private Deck deck;
-    private OneHundredPlayer[] players;
+public class PharaohLogic extends BaseGameLogic {
+
+    private final ArrayList<CardImpl> table;
     private int currentPlayer = 0;
-    private ArrayList<CardImpl> table;
-    private boolean gameCondition;
     private CardImpl lastCard;
-    HashMap<OneHundredPlayer, Integer> score;
+    HashMap<BasePlayer, Integer> score;
     Scanner scanner;
 
-    public OneHundredLogic(OneHundredPlayer[] players, Deck deck) {
-        this.players = players;
-        this.deck = deck;
+    public PharaohLogic(BasePlayer[] players, Deck deck) {
+        super(players,deck);
         this.table = new ArrayList<>();
-        this.gameCondition = true;
         this.score = new HashMap<>();
         this.scanner = new Scanner(System.in);
     }
 
-    public void StartGame() {
-        for (OneHundredPlayer player :
-                players) {
+    public void startGame() {
+        for (BasePlayer player : players) {
             score.put(player, 0);
         }
-        while (checkGameCondition()) {
+        while (defineWinner()) {
             startSet();
             countPlayersScore();
             if (lastCard.CardRank == Rank.HIDDEN) {
@@ -46,14 +44,12 @@ public class OneHundredLogic extends BaseGameLogic {
     }
 
     private void startSet() {
-        for (OneHundredPlayer player : players) {
-            player.TakeHand(CreateHand(4));
-        }
+        giveCardToPlayers(4);
         table.add(players[currentPlayer].GiveLastCard());
         lastCard = table.get(table.size() - 1);
-        MovePlayerOn(1);
+        movePlayerOn(1);
         do {
-            boolean madeTurn = MakeTurn();
+            boolean madeTurn = makeTurn();
             if (madeTurn) {
                 if (lastCard.CardRank == Rank.LADY) {
                     System.out.println("""
@@ -69,40 +65,40 @@ public class OneHundredLogic extends BaseGameLogic {
                         case "3" -> lastCard = new CardImpl(Suit.HEARTS, Rank.HIDDEN);
                         case "4" -> lastCard = new CardImpl(Suit.SPADES, Rank.HIDDEN);
                     }
-                    MovePlayerOn(1);
+                    movePlayerOn(1);
                     continue;
                 } else if (lastCard.CardRank == Rank.ACE) {
-                    MovePlayerOn(2);
+                    movePlayerOn(2);
                     continue;
                 } else if (lastCard.CardRank == Rank.SEVEN) {
-                    NextTakeCard(2);
-                    MovePlayerOn(2);
+                    nextPlayerTakeCardCount(2);
+                    movePlayerOn(2);
                     continue;
                 } else if (lastCard.CardRank == Rank.KING && lastCard.CardSuit == Suit.CLUBS) {
-                    NextTakeCard(5);
-                    MovePlayerOn(2);
+                    nextPlayerTakeCardCount(5);
+                    movePlayerOn(2);
                     continue;
                 } else if (lastCard.CardRank == Rank.SIX) {
                     continue;
                 }
             }
-            MovePlayerOn(1);
+            movePlayerOn(1);
         } while (!checkSetCondition());
     }
 
-    private void MovePlayerOn(int count) {
+    private void movePlayerOn(int count) {
         currentPlayer += count;
         currentPlayer %= players.length;
     }
 
-    private void NextTakeCard(int count) {
+    private void nextPlayerTakeCardCount(int count) {
         for (int i = 0; i < count; i++) {
-            players[(currentPlayer + 1) % players.length].TakeCard(deck.GiveNext());
+            players[(currentPlayer + 1) % players.length].TakeCard(deck.giveNext());
             if (deck.isEmpty()) deck = new Deck(table);
         }
     }
 
-    private boolean MakeTurn() {
+    private boolean makeTurn() {
         System.out.printf("Player %s make your turn(type number of command)\n", players[currentPlayer].name);
         boolean take = true;
         while (true) {
@@ -127,7 +123,7 @@ public class OneHundredLogic extends BaseGameLogic {
                 }
                 case "4" -> {
                     if (take) {
-                        players[currentPlayer].TakeCard(deck.GiveNext());
+                        players[currentPlayer].TakeCard(deck.giveNext());
                         take = false;
                     } else {
                         return false;
@@ -147,7 +143,7 @@ public class OneHundredLogic extends BaseGameLogic {
             numberOfCardOnHand = Integer.parseInt(scanner.nextLine()) - 1;
             if (numberOfCardOnHand == -1) return false;
             playerCard = players[currentPlayer].hand.get(numberOfCardOnHand);
-            if (!possibleTurn(playerCard)) {
+            if (checkMoveCorrectness(playerCard)) {
                 System.out.println("Try another card");
                 continue;
             }
@@ -160,7 +156,7 @@ public class OneHundredLogic extends BaseGameLogic {
     }
 
     private void countPlayersScore() {
-        for (OneHundredPlayer player : players) {
+        for (BasePlayer player : players) {
             CardImpl card = player.GiveLastCard();
             switch (card.CardRank) {
                 case JACK -> score.replace(player, score.get(player) + 2);
@@ -172,19 +168,26 @@ public class OneHundredLogic extends BaseGameLogic {
         }
     }
 
-    private boolean possibleTurn(CardImpl card) {
+    @Override
+    protected int defineFirstPlayer() {
+        return 0;
+    }
+
+    @Override
+    protected boolean checkMoveCorrectness(CardImpl card) {
         CardImpl cardOnTable = table.get(table.size() - 1);
-        return (card.CardRank == cardOnTable.CardRank ||
-                card.CardSuit == cardOnTable.CardSuit);
+        return (card.CardRank != cardOnTable.CardRank &&
+                card.CardSuit != cardOnTable.CardSuit);
     }
 
     private boolean checkSetCondition() {
         return players[currentPlayer].hand.size() == 0;
     }
 
-    private boolean checkGameCondition() {
+    @Override
+    protected boolean defineWinner() {
         int count = 0;
-        for (OneHundredPlayer player : players) {
+        for (BasePlayer player : players) {
             if (score.get(player) < 101) {
                 count += 1;
             }
@@ -192,10 +195,10 @@ public class OneHundredLogic extends BaseGameLogic {
         return count >= 1;
     }
 
-    private ArrayList<CardImpl> CreateHand(int count) {
-        ArrayList<CardImpl> hand = new ArrayList<CardImpl>();
+    protected ArrayList<CardImpl> createHand(int count) {
+        ArrayList<CardImpl> hand = new ArrayList<>();
         for (int i = 0; i < count; i++) {
-            hand.add(deck.GiveNext());
+            hand.add(deck.giveNext());
         }
         return hand;
     }

@@ -2,12 +2,21 @@ package com;
 
 import com.common.deck.Deck;
 import com.common.deck.DeckType;
-import com.games.OneHundred.OneHundredLogic;
-import com.games.OneHundred.OneHundredPlayer;
-
+import com.common.player.BasePlayer;
+import com.games.fool.FoolLogic;
 
 public class Main {
     public static void main(String[] args) {
+        // Instantiate Telegram Bots API
+//        TelegramBotsApi botsApi;
+//        TelegramBot bot = new TelegramBot();
+//        try {
+//            botsApi = new TelegramBotsApi(DefaultBotSession.class);
+//            botsApi.registerBot(bot);
+//        } catch (TelegramApiException e) {
+//            e.printStackTrace();
+//        }
+
 //        Scanner scanner = new Scanner(System.in);
 //
 //        String deckTypeString=scanner.nextLine().split(" ")[0];
@@ -20,26 +29,23 @@ public class Main {
 //        Bot bot = new Bot(gameLogic);
 //
 //        bot.start();
+        BasePlayer player1 = new BasePlayer("player1");
+        BasePlayer player2 = new BasePlayer("player2");
+        BasePlayer player3 = new BasePlayer("player3");
+        BasePlayer[] players = new BasePlayer[]{player1,player2,player3};
+        FoolLogic game = new FoolLogic(players,new Deck(DeckType.MEDIUM));
+        game.startGame();
 
-        OneHundredPlayer player1 = new OneHundredPlayer();
-        OneHundredPlayer player2 = new OneHundredPlayer();
-        var players = new OneHundredPlayer[]{player1,player2};
-        OneHundredLogic game = new OneHundredLogic(players,new Deck(DeckType.MEDIUM));
-        game.StartGame();
     }
 
-    private static DeckType getDeckType(String deckTypeString){
-        int deckTypeInteger=Integer.parseInt(deckTypeString);
+    private static DeckType getDeckType(String deckTypeString) {
+        int deckTypeInteger = Integer.parseInt(deckTypeString);
 
-        switch (deckTypeInteger){
-            case 24:
-                return DeckType.SMALL;
-            case 36:
-                return DeckType.MEDIUM;
-            case 52:
-                return DeckType.BIG;
-            default:
-                throw new IllegalStateException("Unexpected value: " + deckTypeInteger);
-        }
+        return switch (deckTypeInteger) {
+            case 24 -> DeckType.SMALL;
+            case 36 -> DeckType.MEDIUM;
+            case 52 -> DeckType.BIG;
+            default -> throw new IllegalStateException("Unexpected value: " + deckTypeInteger);
+        };
     }
 }

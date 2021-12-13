@@ -9,7 +9,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class Deck {
-    private List<CardImpl> Cards;
+    private final List<CardImpl> Cards;
 
     public Deck(DeckType deckType) {
         int cardsCount = deckType.getCardsCount();
@@ -35,7 +35,6 @@ public class Deck {
 
     private List<CardImpl> getSortedDeck(int length) {
         List<CardImpl> cards= new ArrayList<>(length);
-        int i = 0;
         for (Suit suit : Suit.values()) {
             if (suit == Suit.HIDDEN) continue;
             for (Rank rank : Rank.values()) {
@@ -45,13 +44,12 @@ public class Deck {
                 if (checkCardDeckConditions(length, 24, rank.ordinal(), 8)) continue;
 
                 cards.add(new CardImpl(suit, rank));
-                i++;
             }
         }
         return cards;
     }
 
-    public CardImpl GiveNext(){
+    public CardImpl giveNext(){
         CardImpl card = Cards.get(Cards.size()-1);
         Cards.remove(Cards.size()-1);
         return card;

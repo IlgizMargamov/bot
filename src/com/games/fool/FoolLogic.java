@@ -4,62 +4,67 @@ import com.common.card.CardImpl;
 import com.common.card.Rank;
 import com.common.deck.Deck;
 import com.common.gamelogic.BaseGameLogic;
+import com.common.player.BasePlayer;
 
 import java.util.ArrayList;
 import java.util.Scanner;
 
 public class FoolLogic extends BaseGameLogic {
 
-    Deck deck;
-    FoolPlayer[] players;
     ArrayList<Tuple> table;
     CardImpl trump;
     int uncoveredCard;
     boolean deckEmpty;
     boolean trumpGiven;
 
-    public FoolLogic(FoolPlayer[] players, Deck deck) {
-        this.players = players;
-        this.deck = deck;
-        giveCardToPlayers();
+    public FoolLogic(BasePlayer[] players, Deck deck) {
+        super(players, deck);
+        giveCardToPlayers(6);
         this.table = new ArrayList<>();
         this.uncoveredCard = 0;
         this.deckEmpty = false;
     }
 
-    public void StartGame() {
-        int currentTurn = chooseFirst();
+    public void startGame() {
+        int currentTurn = defineFirstPlayer();
         trumpGiven = false;
-        while (true) {
+        while (!defineWinner()) {
             boolean lose = makeSet(currentTurn);
             if (lose) currentTurn += 2;
             else currentTurn++;
             table.clear();
-            int count = checkEnd();
-            if(count == 0){
-                System.out.println("Tie!");
-                break;
-            }
-            else if(count == 1){
-                for (FoolPlayer player:players) {
-                    if(player.hand.size() != 0){
-                        System.out.println(player.name + "you lose!");
-                    }
+        }
+    }
+
+
+    protected boolean defineWinner() {
+        int count = checkEnd();
+        if(count == 0){
+            System.out.println("Tie!");
+            return true;
+        }
+        else if(count == 1){
+            for (BasePlayer player:players) {
+                if(player.hand.size() != 0){
+                    System.out.println(player.name + "you lose!");
+                    return true;
                 }
             }
         }
+        return false;
     }
 
     private int checkEnd(){
         int count = 0;
-        for (FoolPlayer player:players) {
+        for (BasePlayer player:players) {
             if(player.hand.size() > 0) count++;
         }
         return count;
     }
 
-    private int chooseFirst() {
-        trump = deck.GiveNext();
+    @Override
+    protected int defineFirstPlayer() {
+        trump = deck.giveNext();
         CardImpl minCard = new CardImpl(trump.CardSuit, Rank.ACE);
         int firstPlayer = 0;
         for (int i = 0; i < players.length; i++) {
@@ -73,21 +78,8 @@ public class FoolLogic extends BaseGameLogic {
         return firstPlayer;
     }
 
-    private void giveCardToPlayers() {
-        for (FoolPlayer player : players) {
-            player.TakeHand(createHand(6));
-        }
-    }
 
-    private ArrayList<CardImpl> createHand(int count) {
-        ArrayList<CardImpl> hand = new ArrayList<>();
-        for (int i = 0; i < count; i++) {
-            hand.add(deck.GiveNext());
-        }
-        return hand;
-    }
-
-    private boolean makeSet(int firstPlayer) {
+    protected boolean makeSet(int firstPlayer) {
         int attackPlayer2 = (firstPlayer + 2) % players.length;
         int defendPlayer = (firstPlayer + 1) % players.length;
         boolean end;
@@ -104,7 +96,7 @@ public class FoolLogic extends BaseGameLogic {
     }
 
     private void giveAllToSix() {
-        for (FoolPlayer player : players) {
+        for (BasePlayer player : players) {
             while (player.hand.size() < 6) {
                 if (deck.isEmpty()) {
                     deckEmpty = true;
@@ -112,7 +104,7 @@ public class FoolLogic extends BaseGameLogic {
                     trumpGiven = true;
                     break;
                 }
-                player.TakeCard(deck.GiveNext());
+                player.TakeCard(deck.giveNext());
             }
         }
     }
@@ -148,7 +140,7 @@ public class FoolLogic extends BaseGameLogic {
                     int numberOfCardOnHand = Integer.parseInt(scanner.nextLine()) - 1;
                     if (numberOfCardOnHand == -1) continue;
                     CardImpl playerCard = players[currentPlayer].hand.get(numberOfCardOnHand);
-                    if (!isPossibleTurn(playerCard)) {
+                    if (checkMoveCorrectness(playerCard)) {
                         System.out.println("Try another card");
                         continue;
                     }
@@ -224,17 +216,18 @@ public class FoolLogic extends BaseGameLogic {
         }
     }
 
-    private boolean isPossibleTurn(CardImpl card) {
-        if (table.size() == 0) return true;
+    @Override
+    protected boolean checkMoveCorrectness(CardImpl card) {
+        if (table.size() == 0) return false;
         for (Tuple tuple : table) {
             if (tuple.first.CardRank == card.CardRank ||
                     (tuple.second != null && tuple.second.CardRank == card.CardRank)) {
-                return true;
+                return false;
             }
         }
-        return false;
+        return true;
     }
-
+    
     private class Tuple {
         public CardImpl first;
         public CardImpl second;
