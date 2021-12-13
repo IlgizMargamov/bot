@@ -1,15 +1,15 @@
 package telegram;
 
-import com.games.fool.FoolPlayer;
+import com.common.player.BasePlayer;
 
 import java.util.List;
 
 public class Lobby {
     public String m_creator;
     public String m_pin;
-    public List<FoolPlayer> m_playerList;
+    public List<BasePlayer> m_playerList;
 
-    public Lobby(String creator, String pin, List<FoolPlayer> playersList) {
+    public Lobby(String creator, String pin, List<BasePlayer> playersList) {
         m_creator = creator;
         m_pin = pin;
         m_playerList = playersList;

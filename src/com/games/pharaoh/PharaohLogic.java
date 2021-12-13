@@ -5,36 +5,35 @@ import com.common.card.Rank;
 import com.common.card.Suit;
 import com.common.deck.Deck;
 import com.common.gamelogic.BaseGameLogic;
+import com.common.player.BasePlayer;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Scanner;
 
+//TODO: Fix bug with 6
+//TODO: Score between set
+
 public class PharaohLogic extends BaseGameLogic {
 
-    private final PharaohPlayer[] players;
     private final ArrayList<CardImpl> table;
-    private Deck deck;
     private int currentPlayer = 0;
-    private boolean gameCondition;
     private CardImpl lastCard;
-    HashMap<PharaohPlayer, Integer> score;
+    HashMap<BasePlayer, Integer> score;
     Scanner scanner;
 
-    public PharaohLogic(PharaohPlayer[] players, Deck deck) {
-        this.players = players;
-        this.deck = deck;
+    public PharaohLogic(BasePlayer[] players, Deck deck) {
+        super(players,deck);
         this.table = new ArrayList<>();
-        this.gameCondition = true;
         this.score = new HashMap<>();
         this.scanner = new Scanner(System.in);
     }
 
     public void startGame() {
-        for (PharaohPlayer player : players) {
+        for (BasePlayer player : players) {
             score.put(player, 0);
         }
-        while (checkGameCondition()) {
+        while (defineWinner()) {
             startSet();
             countPlayersScore();
             if (lastCard.CardRank == Rank.HIDDEN) {
@@ -45,9 +44,7 @@ public class PharaohLogic extends BaseGameLogic {
     }
 
     private void startSet() {
-        for (PharaohPlayer player : players) {
-            player.TakeHand(createHand(4));
-        }
+        giveCardToPlayers(4);
         table.add(players[currentPlayer].GiveLastCard());
         lastCard = table.get(table.size() - 1);
         movePlayerOn(1);
@@ -146,7 +143,7 @@ public class PharaohLogic extends BaseGameLogic {
             numberOfCardOnHand = Integer.parseInt(scanner.nextLine()) - 1;
             if (numberOfCardOnHand == -1) return false;
             playerCard = players[currentPlayer].hand.get(numberOfCardOnHand);
-            if (!possibleTurn(playerCard)) {
+            if (checkMoveCorrectness(playerCard)) {
                 System.out.println("Try another card");
                 continue;
             }
@@ -159,7 +156,7 @@ public class PharaohLogic extends BaseGameLogic {
     }
 
     private void countPlayersScore() {
-        for (PharaohPlayer player : players) {
+        for (BasePlayer player : players) {
             CardImpl card = player.GiveLastCard();
             switch (card.CardRank) {
                 case JACK -> score.replace(player, score.get(player) + 2);
@@ -171,19 +168,26 @@ public class PharaohLogic extends BaseGameLogic {
         }
     }
 
-    private boolean possibleTurn(CardImpl card) {
+    @Override
+    protected int defineFirstPlayer() {
+        return 0;
+    }
+
+    @Override
+    protected boolean checkMoveCorrectness(CardImpl card) {
         CardImpl cardOnTable = table.get(table.size() - 1);
-        return (card.CardRank == cardOnTable.CardRank ||
-                card.CardSuit == cardOnTable.CardSuit);
+        return (card.CardRank != cardOnTable.CardRank &&
+                card.CardSuit != cardOnTable.CardSuit);
     }
 
     private boolean checkSetCondition() {
         return players[currentPlayer].hand.size() == 0;
     }
 
-    private boolean checkGameCondition() {
+    @Override
+    protected boolean defineWinner() {
         int count = 0;
-        for (PharaohPlayer player : players) {
+        for (BasePlayer player : players) {
             if (score.get(player) < 101) {
                 count += 1;
             }
@@ -191,7 +195,7 @@ public class PharaohLogic extends BaseGameLogic {
         return count >= 1;
     }
 
-    private ArrayList<CardImpl> createHand(int count) {
+    protected ArrayList<CardImpl> createHand(int count) {
         ArrayList<CardImpl> hand = new ArrayList<>();
         for (int i = 0; i < count; i++) {
             hand.add(deck.giveNext());

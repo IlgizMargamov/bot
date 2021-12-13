@@ -2,8 +2,8 @@ package telegram;
 
 import com.common.deck.Deck;
 import com.common.deck.DeckType;
+import com.common.player.BasePlayer;
 import com.games.fool.FoolLogic;
-import com.games.fool.FoolPlayer;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Random;
 
 public class TelegramBot extends TelegramLongPollingBot {
-    public List<FoolPlayer> playerList=new ArrayList<>();
+    public List<BasePlayer> playerList=new ArrayList<>();
     public FoolLogic gameLogic;
     private List<Lobby> lobbies=new ArrayList<>();
     private final String token = "5008512617:AAELuxvMo_D0hg1C8pHiRN52NYWhewlHgAw";
@@ -68,7 +68,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                 if (strings[strings.length - 1].equals("fool")) {
                     playerList = new ArrayList<>();
 
-                    FoolPlayer player = new FoolPlayer();
+                    BasePlayer player = new BasePlayer();
                     player.name = currentUser;
 
                     playerList.add(player);
@@ -84,7 +84,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                 String friendName = "";
                 for (Lobby lobby : lobbies) {
                     if (lobby.m_pin.equals(messageFromInput)) {
-                        FoolPlayer player = new FoolPlayer();
+                        BasePlayer player = new BasePlayer();
                         player.name = currentUser;
                         lobby.m_playerList.add(player);
                         isSuccessful = true;
@@ -106,7 +106,7 @@ public class TelegramBot extends TelegramLongPollingBot {
             } else if (messageFromInput.equals(startGame)) {
                 int size = playerList.size();
                 if (size < 5) {
-                    FoolPlayer[] players = new FoolPlayer[size];
+                    BasePlayer[] players = new BasePlayer[size];
                     for (int i = 0; i < size; i++) {
                         players[i] = playerList.get(i);
                     }
