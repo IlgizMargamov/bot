@@ -5,12 +5,14 @@ import com.common.deck.Deck;
 import com.common.player.BasePlayer;
 
 import java.util.ArrayList;
+import java.util.Scanner;
 
 public abstract class BaseGameLogic implements GameLogic {
 
     protected Deck deck;
     protected BasePlayer[] players;
     protected int currentPlayer;
+    protected Scanner scanner = new Scanner(System.in);
 
     public BaseGameLogic(BasePlayer[] players, Deck deck) {
         this.deck = deck;
@@ -22,6 +24,7 @@ public abstract class BaseGameLogic implements GameLogic {
     protected abstract int defineFirstPlayer();
     protected abstract boolean checkMoveCorrectness(CardImpl card);
     protected abstract boolean defineWinner();
+    protected abstract boolean startSet();
 
     protected void movePlayerOn(int count) {
         currentPlayer += count;
@@ -40,5 +43,16 @@ public abstract class BaseGameLogic implements GameLogic {
         for (BasePlayer player : players) {
             player.TakeHand(createHand(count));
         }
+    }
+
+    protected void sendToUser(String[] message) {
+        for (String msg : message) {
+            System.out.println(msg);
+        }
+        System.out.println();
+    }
+
+    protected String getFromUser(){
+        return scanner.nextLine();
     }
 }

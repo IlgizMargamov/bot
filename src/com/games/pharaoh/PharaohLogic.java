@@ -6,26 +6,26 @@ import com.common.card.Suit;
 import com.common.deck.Deck;
 import com.common.gamelogic.BaseGameLogic;
 import com.common.player.BasePlayer;
+import com.games.TypeOfTurn;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Scanner;
 
-//TODO: Fix bug with 6
-//TODO: Score between set
+import static com.games.TypeOfTurn.*;
+
 
 public class PharaohLogic extends BaseGameLogic {
 
     private final ArrayList<CardImpl> table;
     private CardImpl lastCard;
+    private final String[] withPass = new String[]{CHECK_HAND.getString(), CHECK_TABLE.getString(), THROW_CARD.getString(), PASS.getString()};
+    private final String[] withoutPass = new String[]{CHECK_HAND.getString(), CHECK_TABLE.getString(), THROW_CARD.getString(), TAKE.getString()};
     HashMap<BasePlayer, Integer> score;
-    Scanner scanner;
 
     public PharaohLogic(BasePlayer[] players, Deck deck) {
-        super(players,deck);
+        super(players, deck);
         this.table = new ArrayList<>();
         this.score = new HashMap<>();
-        this.scanner = new Scanner(System.in);
     }
 
     public void startGame() {
@@ -39,10 +39,16 @@ public class PharaohLogic extends BaseGameLogic {
                 score.replace(players[(currentPlayer - 1) % players.length],
                         score.get(players[(currentPlayer - 1) % players.length]) - 20);
             }
+            ArrayList<String> message = new ArrayList<>();
+            for (BasePlayer player: score.keySet() ) {
+                message.add(player.name + " : " + score.get(player));
+            }
+            sendToUser(message.toArray(new String[0]));
         }
     }
 
-    private void startSet() {
+    @Override
+    protected boolean startSet() {
         giveCardToPlayers(4);
         table.add(players[currentPlayer].GiveLastCard());
         lastCard = table.get(table.size() - 1);
@@ -51,19 +57,16 @@ public class PharaohLogic extends BaseGameLogic {
             boolean madeTurn = makeTurn();
             if (madeTurn) {
                 if (lastCard.CardRank == Rank.LADY) {
-                    System.out.println("""
-                            Choose a next card suit
-                            1. Club
-                            2. Diamond
-                            3. Hearts
-                            4. Spades""");
-                    String command = scanner.nextLine();
-                    switch (command) {
-                        case "1" -> lastCard = new CardImpl(Suit.CLUBS, Rank.HIDDEN);
-                        case "2" -> lastCard = new CardImpl(Suit.DIAMOND, Rank.HIDDEN);
-                        case "3" -> lastCard = new CardImpl(Suit.HEARTS, Rank.HIDDEN);
-                        case "4" -> lastCard = new CardImpl(Suit.SPADES, Rank.HIDDEN);
-                    }
+                    sendToUser(new String[]{"Choose a next card suit",
+                            "1. Club",
+                            "2. Diamond",
+                            "3. Hearts",
+                            "4. Spades"});
+                    Suit pickedSuit;
+                    do {
+                        pickedSuit = Suit.valuesOf(getFromUser());
+                    } while (pickedSuit == Suit.HIDDEN);
+                    lastCard = new CardImpl(pickedSuit, Rank.HIDDEN);
                     movePlayerOn(1);
                     continue;
                 } else if (lastCard.CardRank == Rank.ACE) {
@@ -83,8 +86,8 @@ public class PharaohLogic extends BaseGameLogic {
             }
             movePlayerOn(1);
         } while (!checkSetCondition());
+        return false;
     }
-
 
 
     private void nextPlayerTakeCardCount(int count) {
@@ -94,30 +97,26 @@ public class PharaohLogic extends BaseGameLogic {
         }
     }
 
-    private boolean makeTurn() {
-        System.out.printf("Player %s make your turn(type number of command)\n", players[currentPlayer].name);
+    protected boolean makeTurn() {
+        sendToUser(new String[]{"Player " + players[currentPlayer].name + " make your turn(type number of command)\n"});
         boolean take = true;
         while (true) {
-            System.out.println("""
-                    Type of turn:
-                    1. What on my hand?
-                    2. What on the table?
-                    3. Throw this card.""");
-            if (take) System.out.println("4. Take");
-            else System.out.println("4. Pass");
-            String command = scanner.nextLine();
+            if (take) sendToUser(withoutPass);
+            else sendToUser(withPass);
+            TypeOfTurn command = TypeOfTurn.pickTurn(getFromUser());
+
             switch (command) {
-                case "1" -> players[currentPlayer].ShowHand();
-                case "2" -> {
+                case CHECK_HAND -> players[currentPlayer].ShowHand();
+                case CHECK_TABLE -> {
                     Rank rank = lastCard.CardRank;
-                    if (rank == Rank.HIDDEN) System.out.println(lastCard.CardSuit);
-                    else System.out.println(lastCard.CardSuit + " " + rank);
+                    if (rank == Rank.HIDDEN) sendToUser(new String[]{lastCard.CardSuit.getSuit()});
+                    else sendToUser(new String[]{lastCard.CardSuit + " " + rank});
                 }
-                case "3" -> {
+                case THROW_CARD -> {
                     boolean endTurn = throwCard();
                     if (endTurn) return true;
                 }
-                case "4" -> {
+                case TAKE -> {
                     if (take) {
                         players[currentPlayer].TakeCard(deck.giveNext());
                         take = false;
@@ -129,18 +128,22 @@ public class PharaohLogic extends BaseGameLogic {
         }
     }
 
+
+
     private boolean throwCard() {
-        System.out.println("What card you want to throw?");
-        players[currentPlayer].ShowHand();
-        System.out.println("0. Back.");
+        ArrayList<String> message = new ArrayList<>();
+        message.add("What card you want to throw?");
+        message.addAll(players[currentPlayer].ShowHand());
+        message.add("0. Back.");
+        sendToUser(message.toArray(new String[0]));
         CardImpl playerCard;
         int numberOfCardOnHand;
         while (true) {
-            numberOfCardOnHand = Integer.parseInt(scanner.nextLine()) - 1;
+            numberOfCardOnHand = Integer.parseInt(getFromUser()) - 1;
             if (numberOfCardOnHand == -1) return false;
             playerCard = players[currentPlayer].hand.get(numberOfCardOnHand);
             if (checkMoveCorrectness(playerCard)) {
-                System.out.println("Try another card");
+                sendToUser(new String[]{"Try another card"});
                 continue;
             }
             break;
@@ -153,13 +156,15 @@ public class PharaohLogic extends BaseGameLogic {
 
     private void countPlayersScore() {
         for (BasePlayer player : players) {
-            CardImpl card = player.GiveLastCard();
-            switch (card.CardRank) {
-                case JACK -> score.replace(player, score.get(player) + 2);
-                case LADY -> score.replace(player, score.get(player) + 3);
-                case KING -> score.replace(player, score.get(player) + 4);
-                case ACE -> score.replace(player, score.get(player) + 11);
-                default -> score.replace(player, score.get(player) + card.CardRank.ordinal());
+            while (player.hand.size() != 0) {
+                CardImpl card = player.GiveLastCard();
+                switch (card.CardRank) {
+                    case JACK -> score.replace(player, score.get(player) + 2);
+                    case LADY -> score.replace(player, score.get(player) + 3);
+                    case KING -> score.replace(player, score.get(player) + 4);
+                    case ACE -> score.replace(player, score.get(player) + 11);
+                    default -> score.replace(player, score.get(player) + card.CardRank.ordinal());
+                }
             }
         }
     }
@@ -189,13 +194,5 @@ public class PharaohLogic extends BaseGameLogic {
             }
         }
         return count >= 1;
-    }
-
-    protected ArrayList<CardImpl> createHand(int count) {
-        ArrayList<CardImpl> hand = new ArrayList<>();
-        for (int i = 0; i < count; i++) {
-            hand.add(deck.giveNext());
-        }
-        return hand;
     }
 }

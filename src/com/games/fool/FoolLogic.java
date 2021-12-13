@@ -5,9 +5,11 @@ import com.common.card.Rank;
 import com.common.deck.Deck;
 import com.common.gamelogic.BaseGameLogic;
 import com.common.player.BasePlayer;
+import com.games.TypeOfTurn;
 
 import java.util.ArrayList;
-import java.util.Scanner;
+
+import static com.games.TypeOfTurn.*;
 
 public class FoolLogic extends BaseGameLogic {
 
@@ -16,6 +18,7 @@ public class FoolLogic extends BaseGameLogic {
     int uncoveredCard;
     boolean deckEmpty;
     boolean trumpGiven;
+    String[] defaultTurn = new String[]{CHECK_HAND.getString(), CHECK_TABLE.getString(), CHECK_TRUMP.getString(), THROW_CARD.getString(), PASS.getString()};
 
     public FoolLogic(BasePlayer[] players, Deck deck) {
         super(players, deck);
@@ -29,7 +32,7 @@ public class FoolLogic extends BaseGameLogic {
         currentPlayer = defineFirstPlayer();
         trumpGiven = false;
         while (!defineWinner()) {
-            boolean lose = makeSet();
+            boolean lose = startSet();
             if (lose) movePlayerOn(2);
             else movePlayerOn(1);
             table.clear();
@@ -39,14 +42,13 @@ public class FoolLogic extends BaseGameLogic {
 
     protected boolean defineWinner() {
         int count = checkEnd();
-        if(count == 0){
-            System.out.println("Tie!");
+        if (count == 0) {
+            sendToUser(new String[]{"Tie!"});
             return true;
-        }
-        else if(count == 1){
-            for (BasePlayer player:players) {
-                if(player.hand.size() != 0){
-                    System.out.println(player.name + "you lose!");
+        } else if (count == 1) {
+            for (BasePlayer player : players) {
+                if (player.hand.size() != 0) {
+                    sendToUser(new String[]{player.name + "you lose!"});
                     return true;
                 }
             }
@@ -54,10 +56,10 @@ public class FoolLogic extends BaseGameLogic {
         return false;
     }
 
-    private int checkEnd(){
+    private int checkEnd() {
         int count = 0;
-        for (BasePlayer player:players) {
-            if(player.hand.size() > 0) count++;
+        for (BasePlayer player : players) {
+            if (player.hand.size() > 0) count++;
         }
         return count;
     }
@@ -78,16 +80,16 @@ public class FoolLogic extends BaseGameLogic {
         return firstPlayer;
     }
 
-
-    protected boolean makeSet() {
+    @Override
+    protected boolean startSet() {
         int attackPlayer2 = (currentPlayer + 2) % players.length;
         int defendPlayer = (currentPlayer + 1) % players.length;
         boolean end;
-        attackTurn(false, currentPlayer);
+        makeTurn(false, currentPlayer, AttackOrDefend.ATTACK);
         while (true) {
-            end = defendTurn(defendPlayer);
-            attackTurn(true, currentPlayer);
-            if (currentPlayer != attackPlayer2) attackTurn(true, attackPlayer2);
+            end = makeTurn(false,defendPlayer,AttackOrDefend.DEFEND);
+            makeTurn(true, currentPlayer,AttackOrDefend.ATTACK);
+            if (currentPlayer != attackPlayer2) makeTurn(true, attackPlayer2,AttackOrDefend.ATTACK);
             if (end) break;
             if (uncoveredCard == 0) break;
         }
@@ -109,108 +111,75 @@ public class FoolLogic extends BaseGameLogic {
         }
     }
 
-    private void attackTurn(boolean possiblePass, int currentPlayer) {
-        System.out.printf("Player %s make your turn(type number of command)\n", players[currentPlayer].name);
+    private boolean makeTurn(boolean possiblePass, int currentPlayer, AttackOrDefend turn) {
+        sendToUser(new String[]{turn.getMsg(),"Player " + players[currentPlayer].name + " make your turn(type number of command)"});
         while (true) {
-            System.out.println("""
-                    Type of turn:
-                    1. What on my hand?
-                    2. What on the table?
-                    3. What is trump?
-                    4. Throw this card.
-                    5. Pass.""");
-            Scanner scanner = new Scanner(System.in);
-            String command = scanner.nextLine();
+            sendToUser(defaultTurn);
+            TypeOfTurn command = TypeOfTurn.pickTurn(getFromUser());
             switch (command) {
-                case "1" -> players[currentPlayer].ShowHand();
-                case "2" -> {
+                case CHECK_HAND -> sendToUser(players[currentPlayer].ShowHand().toArray(new String[0]));
+                case CHECK_TABLE -> {
                     if (table.size() == 0) {
-                        System.out.println("Table is empty");
+                        sendToUser(new String[]{"Table is empty"});
                         continue;
                     }
                     for (Tuple card : table) {
-                        System.out.println(card.toString());
+                        sendToUser(new String[]{card.toString()});
                     }
                 }
-                case "3" -> System.out.println(trump.cardSuitAndRank());
-                case "4" -> {
-                    System.out.println("What card you want to throw?");
-                    players[currentPlayer].ShowHand();
-                    System.out.println("0. Back.");
-                    int numberOfCardOnHand = Integer.parseInt(scanner.nextLine()) - 1;
+                case CHECK_TRUMP -> sendToUser(new String[]{trump.cardSuitAndRank()});
+                case THROW_CARD -> {
+                    sendToUser(new String[]{"What card you want to throw?"});
+                    sendToUser(players[currentPlayer].ShowHand().toArray(new String[0]));
+                    sendToUser(new String[]{"0. Back."});
+                    int numberOfCardOnHand = Integer.parseInt(getFromUser()) - 1;
                     if (numberOfCardOnHand == -1) continue;
                     CardImpl playerCard = players[currentPlayer].hand.get(numberOfCardOnHand);
-                    if (checkMoveCorrectness(playerCard)) {
-                        System.out.println("Try another card");
-                        continue;
+                    if(turn == AttackOrDefend.ATTACK) {
+                        if (checkMoveCorrectness(playerCard)) {
+                            sendToUser(new String[]{"Try another card"});
+                            continue;
+                        }
+                        table.add(new Tuple(playerCard));
+                        players[currentPlayer].RemoveCard(numberOfCardOnHand);
+                        possiblePass = true;
+                        uncoveredCard++;
+                        if (table.size() == 6) {
+                            sendToUser(new String[]{"Table is full!"});
+                        }
+                        sendToUser(new String[]{"Is it all? y/n"});
+                        String answer = getFromUser();
+                        if (answer.equals("y")) {
+                            return true;
+                        }
                     }
-                    table.add(new Tuple(playerCard));
-                    players[currentPlayer].RemoveCard(numberOfCardOnHand);
-                    possiblePass = true;
-                    uncoveredCard++;
-                    if (table.size() == 6) {
-                        System.out.println("Table is full!");
-                    }
-                    System.out.println("Is it all? y/n");
-                    String answer = scanner.nextLine();
-                    if (answer.equals("y")) {
-                        return;
-                    }
-                }
-                case "5" -> {
-                    if (possiblePass) return;
-                    System.out.println("It's only start of set!");
-                }
-            }
-        }
-    }
-
-    private boolean defendTurn(int currentPlayer) {
-        System.out.printf("Player %s make your turn(type number of command)\n", players[currentPlayer].name);
-        while (true) {
-            System.out.println("""
-                    Type of turn:
-                    1. What on my hand?
-                    2. What on the table?
-                    3. What is trump?
-                    4. Throw this card.
-                    5. Pass""");
-            Scanner scanner = new Scanner(System.in);
-            String command = scanner.nextLine();
-            switch (command) {
-                case "1" -> players[currentPlayer].ShowHand();
-                case "2" -> {
-                    for (Tuple card : table) {
-                        System.out.println(card.toString());
+                    else{
+                        sendToUser(new String[]{"Where you want to throw it?"});
+                        for (int i = 0; i < table.size(); i++) {
+                            if (table.get(i).second != null) continue;
+                            sendToUser(new String[]{i + 1 + ". " + table.get(i).toString()});
+                        }
+                        int numberOfCardOnTable = Integer.parseInt(getFromUser()) - 1;
+                        table.get(numberOfCardOnTable).Cover(playerCard);
+                        if (table.get(numberOfCardOnTable).second == null) continue;
+                        players[currentPlayer].RemoveCard(numberOfCardOnHand);
+                        uncoveredCard--;
+                        if (uncoveredCard == 0) return false;
                     }
                 }
-                case "3" -> System.out.println(trump.cardSuitAndRank());
-                case "4" -> {
-                    System.out.println("What card you want to throw?");
-                    players[currentPlayer].ShowHand();
-                    System.out.println("0. Back.");
-                    int numberOfCardOnHand = Integer.parseInt(scanner.nextLine()) - 1;
-                    if (numberOfCardOnHand == -1) continue;
-                    CardImpl playerCard = players[currentPlayer].hand.get(numberOfCardOnHand);
-                    System.out.println("Where you want to throw it?");
-                    for (int i = 0; i < table.size(); i++) {
-                        if (table.get(i).second != null) continue;
-                        System.out.println(i + 1 + ". " + table.get(i).toString());
+                case PASS -> {
+                    if(turn == AttackOrDefend.ATTACK){
+                        if (possiblePass) return true;
+                        sendToUser(new String[]{"It's only start of set!"});
                     }
-                    int numberOfCardOnTable = Integer.parseInt(scanner.nextLine()) - 1;
-                    table.get(numberOfCardOnTable).Cover(playerCard);
-                    if (table.get(numberOfCardOnTable).second == null) continue;
-                    players[currentPlayer].RemoveCard(numberOfCardOnHand);
-                    uncoveredCard--;
-                    if (uncoveredCard == 0) return false;
-                }
-                case "5" -> {
-                    for (Tuple card : table) {
-                        players[currentPlayer].TakeCard(card.first);
-                        if (card.second != null)
-                            players[currentPlayer].TakeCard(card.second);
+                    else{
+                        for (Tuple card : table) {
+                            players[currentPlayer].TakeCard(card.first);
+                            if (card.second != null)
+                                players[currentPlayer].TakeCard(card.second);
+                        }
+                        return true;
                     }
-                    return true;
                 }
             }
         }
@@ -227,7 +196,7 @@ public class FoolLogic extends BaseGameLogic {
         }
         return true;
     }
-    
+
     private class Tuple {
         public CardImpl first;
         public CardImpl second;
@@ -246,7 +215,7 @@ public class FoolLogic extends BaseGameLogic {
             } else if (first.CardRank.ordinal() < second.CardRank.ordinal() && first.CardSuit == second.CardSuit) {
                 this.second = second;
             } else {
-                System.out.println("Not possible turn!");
+                sendToUser(new String[]{"Not possible turn!"});
             }
         }
 
@@ -254,6 +223,21 @@ public class FoolLogic extends BaseGameLogic {
         public String toString() {
             if (second == null) return first.cardSuitAndRank() + " \\ " + "Nothing";
             return first.cardSuitAndRank() + " \\ " + second.cardSuitAndRank();
+        }
+    }
+
+    private enum AttackOrDefend{
+        ATTACK("You Attack"),
+        DEFEND("You Defend");
+
+        private final String msg;
+
+        AttackOrDefend(String msg){
+            this.msg = msg;
+        }
+
+        public String getMsg() {
+            return msg;
         }
     }
 }
