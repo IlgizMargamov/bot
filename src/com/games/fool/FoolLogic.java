@@ -239,5 +239,6 @@ public class FoolLogic extends BaseGameLogic {
         public String getMsg() {
             return msg;
         }
+
     }
 }

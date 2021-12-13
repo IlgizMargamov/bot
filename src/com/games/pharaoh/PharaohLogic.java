@@ -83,6 +83,7 @@ public class PharaohLogic extends BaseGameLogic {
                 } else if (lastCard.CardRank == Rank.SIX) {
                     continue;
                 }
+
             }
             movePlayerOn(1);
         } while (!checkSetCondition());
@@ -194,5 +195,6 @@ public class PharaohLogic extends BaseGameLogic {
             }
         }
         return count >= 1;
+
     }
 }
