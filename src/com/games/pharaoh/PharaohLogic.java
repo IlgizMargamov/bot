@@ -17,7 +17,6 @@ import java.util.Scanner;
 public class PharaohLogic extends BaseGameLogic {
 
     private final ArrayList<CardImpl> table;
-    private int currentPlayer = 0;
     private CardImpl lastCard;
     HashMap<BasePlayer, Integer> score;
     Scanner scanner;
@@ -86,10 +85,7 @@ public class PharaohLogic extends BaseGameLogic {
         } while (!checkSetCondition());
     }
 
-    private void movePlayerOn(int count) {
-        currentPlayer += count;
-        currentPlayer %= players.length;
-    }
+
 
     private void nextPlayerTakeCardCount(int count) {
         for (int i = 0; i < count; i++) {

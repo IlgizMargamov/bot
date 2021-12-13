@@ -26,12 +26,12 @@ public class FoolLogic extends BaseGameLogic {
     }
 
     public void startGame() {
-        int currentTurn = defineFirstPlayer();
+        currentPlayer = defineFirstPlayer();
         trumpGiven = false;
         while (!defineWinner()) {
-            boolean lose = makeSet(currentTurn);
-            if (lose) currentTurn += 2;
-            else currentTurn++;
+            boolean lose = makeSet();
+            if (lose) movePlayerOn(2);
+            else movePlayerOn(1);
             table.clear();
         }
     }
@@ -79,15 +79,15 @@ public class FoolLogic extends BaseGameLogic {
     }
 
 
-    protected boolean makeSet(int firstPlayer) {
-        int attackPlayer2 = (firstPlayer + 2) % players.length;
-        int defendPlayer = (firstPlayer + 1) % players.length;
+    protected boolean makeSet() {
+        int attackPlayer2 = (currentPlayer + 2) % players.length;
+        int defendPlayer = (currentPlayer + 1) % players.length;
         boolean end;
-        attackTurn(false, firstPlayer);
+        attackTurn(false, currentPlayer);
         while (true) {
             end = defendTurn(defendPlayer);
-            attackTurn(true, firstPlayer);
-            if (firstPlayer != attackPlayer2) attackTurn(true, attackPlayer2);
+            attackTurn(true, currentPlayer);
+            if (currentPlayer != attackPlayer2) attackTurn(true, attackPlayer2);
             if (end) break;
             if (uncoveredCard == 0) break;
         }

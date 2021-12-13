@@ -10,10 +10,12 @@ public abstract class BaseGameLogic implements GameLogic {
 
     protected Deck deck;
     protected BasePlayer[] players;
+    protected int currentPlayer;
 
     public BaseGameLogic(BasePlayer[] players, Deck deck) {
         this.deck = deck;
         this.players = players;
+        currentPlayer = 0;
     }
 
 
@@ -21,6 +23,10 @@ public abstract class BaseGameLogic implements GameLogic {
     protected abstract boolean checkMoveCorrectness(CardImpl card);
     protected abstract boolean defineWinner();
 
+    protected void movePlayerOn(int count) {
+        currentPlayer += count;
+        currentPlayer %= players.length;
+    }
 
     protected ArrayList<CardImpl> createHand(int count) {
         ArrayList<CardImpl> hand = new ArrayList<>();

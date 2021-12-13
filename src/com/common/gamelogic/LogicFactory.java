@@ -7,17 +7,16 @@ import com.games.pharaoh.PharaohLogic;
 
 //TODO: Remake Factory
 public class LogicFactory {
-    public static BaseGameLogic getGameLogic(String gameLogic, Deck deck) {
+    public static BaseGameLogic getGameLogic(String gameLogic, Deck deck, BasePlayer[] players) {
         String game = gameLogic.toUpperCase();
 
         if (game.startsWith("F")){
-            return new FoolLogic(new BasePlayer[2],deck);
+            return new FoolLogic(players,deck);
         }
 
         if (game.startsWith("P")){
-            return new PharaohLogic(new BasePlayer[2], deck);
+            return new PharaohLogic(players, deck);
         }
-
         return null;
     }
 }
