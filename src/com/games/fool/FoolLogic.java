@@ -4,6 +4,7 @@ import com.common.card.CardImpl;
 import com.common.card.Rank;
 import com.common.deck.Deck;
 import com.common.gamelogic.BaseGameLogic;
+import telegram.GameLogicToBot;
 
 import java.util.ArrayList;
 import java.util.Scanner;
@@ -17,6 +18,7 @@ public class FoolLogic extends BaseGameLogic {
     int uncoveredCard;
     boolean deckEmpty;
     boolean trumpGiven;
+    GameLogicToBot telegramBot;
 
     public FoolLogic(FoolPlayer[] players, Deck deck) {
         this.players = players;
@@ -25,6 +27,16 @@ public class FoolLogic extends BaseGameLogic {
         this.table = new ArrayList<>();
         this.uncoveredCard = 0;
         this.deckEmpty = false;
+    }
+
+    public FoolLogic(FoolPlayer[] players, Deck deck, GameLogicToBot telegramBot) {
+        this.players = players;
+        this.deck = deck;
+        giveCardToPlayers();
+        this.table = new ArrayList<>();
+        this.uncoveredCard = 0;
+        this.deckEmpty = false;
+        this.telegramBot = telegramBot;
     }
 
     public void startGame() {

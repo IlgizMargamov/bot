@@ -16,12 +16,14 @@ import java.util.*;
 public class TelegramBot extends TelegramLongPollingBot {
     public static String input;
     public static String output;
-    public Map<String, String> playerNameToChatId;
+
     public FoolLogic gameLogic;
-    private List<Lobby> lobbies=new ArrayList<>();
+
     private final String token = "5008512617:AAELuxvMo_D0hg1C8pHiRN52NYWhewlHgAw";
     private final String botUsername = "Card Games";
 
+    private Map<String, String> playerNameToChatId;
+    private List<Lobby> lobbies=new ArrayList<>();
 
     @Override
     public String getBotUsername() {
@@ -108,7 +110,8 @@ public class TelegramBot extends TelegramLongPollingBot {
                         players[i] = new FoolPlayer(playersName[i].toString());
                     }
                     //PharaohLogic game = new PharaohLogic(players, new Deck(DeckType.MEDIUM));
-                    FoolLogic game = new FoolLogic(players, new Deck(DeckType.MEDIUM));
+                    GameLogicToBot gameLogicToBot=new GameLogicToBot(this);
+                    FoolLogic game = new FoolLogic(players, new Deck(DeckType.MEDIUM), gameLogicToBot);
                     this.gameLogic = game;
                     this.gameLogic.startGame();
                 }
@@ -116,6 +119,34 @@ public class TelegramBot extends TelegramLongPollingBot {
         }
     }
 
+    public String getInputToGameLogic(){
+        return null;
+    }
+
+    public void sendOutputToUser(String playerName, String[] availableCommands){
+        // find player's chatId by playerName
+        String chatId= playerNameToChatId.get(playerName);
+        SendMessage message = SendMessage
+                .builder()
+                .chatId(chatId)
+                .build();
+
+        ReplyKeyboardMarkup replyKeyboardMarkup=new ReplyKeyboardMarkup();
+        List<KeyboardRow> keyboardRows=new ArrayList<>();
+        for (String command : availableCommands){
+            KeyboardRow keyboardRow = new KeyboardRow();
+            keyboardRow.add(command);
+            keyboardRows.add(keyboardRow);
+        }
+        replyKeyboardMarkup.setKeyboard(keyboardRows);
+        message.setReplyMarkup(replyKeyboardMarkup);
+
+        try {
+            execute(message);
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+        }
+    }
 
     private ReplyKeyboardMarkup getStartReplyKeyboardMarkup() {
         ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();

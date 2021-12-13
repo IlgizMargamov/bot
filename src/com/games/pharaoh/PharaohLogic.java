@@ -5,6 +5,7 @@ import com.common.card.Rank;
 import com.common.card.Suit;
 import com.common.deck.Deck;
 import com.common.gamelogic.BaseGameLogic;
+import telegram.GameLogicToBot;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,6 +15,7 @@ public class PharaohLogic extends BaseGameLogic {
 
     private final PharaohPlayer[] players;
     private final ArrayList<CardImpl> table;
+    private GameLogicToBot telegramBot;
     private Deck deck;
     private int currentPlayer = 0;
     private boolean gameCondition;
@@ -28,6 +30,16 @@ public class PharaohLogic extends BaseGameLogic {
         this.gameCondition = true;
         this.score = new HashMap<>();
         this.scanner = new Scanner(System.in);
+    }
+
+    public PharaohLogic(PharaohPlayer[] players, Deck deck, GameLogicToBot telegramBot) {
+        this.players = players;
+        this.deck = deck;
+        this.table = new ArrayList<>();
+        this.gameCondition = true;
+        this.score = new HashMap<>();
+        this.scanner = new Scanner(System.in);
+        this.telegramBot=telegramBot;
     }
 
     public void startGame() {
