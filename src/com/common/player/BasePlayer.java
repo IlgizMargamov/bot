@@ -18,11 +18,14 @@ public class BasePlayer implements Player {
         this.hand = cards;
     }
 
-    public void ShowHand() {
+    public ArrayList<String> ShowHand() {
+        ArrayList<String> array = new ArrayList<>();
         for (int i = 0; i < this.hand.size(); i++) {
             var a = hand.get(i);
-            System.out.println(i + 1 + ". " + a.CardSuit + " " +a.CardRank);
+            array.add(i + 1 + ". " + a.CardSuit + " " +a.CardRank);
         }
+        array.add("");
+        return array;
     }
 
     public void TakeCard(CardImpl card){
