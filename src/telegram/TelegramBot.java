@@ -24,6 +24,7 @@ public class TelegramBot extends TelegramLongPollingBot {
 
     private Map<String, String> playerNameToChatId;
     private List<Lobby> lobbies=new ArrayList<>();
+    private String[] currentAvailableCommands;
 
     @Override
     public String getBotUsername() {
@@ -47,6 +48,8 @@ public class TelegramBot extends TelegramLongPollingBot {
             String createLobbyPharaohCommand = "/create_lobby_pharaoh";
             String createLobbyFoolCommand = "/create_lobby_fool";
             String startGame = "/start_game";
+
+            // TODO: check from who comes the request; if not awaited chatId then print them "not your turn yet"
 
             if (messageFromInput.equals(startCommand)) {
                 ReplyKeyboardMarkup keyboardMarkup = getStartReplyKeyboardMarkup();
@@ -125,6 +128,7 @@ public class TelegramBot extends TelegramLongPollingBot {
 
     public void sendOutputToUser(String playerName, String[] availableCommands){
         // find player's chatId by playerName
+        currentAvailableCommands=availableCommands;
         String chatId= playerNameToChatId.get(playerName);
         SendMessage message = SendMessage
                 .builder()
