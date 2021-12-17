@@ -3,7 +3,9 @@ package com.games.fool;
 import com.common.card.CardImpl;
 import com.common.card.Rank;
 import com.common.deck.Deck;
+import com.common.gamelogic.AnswerToPlayer;
 import com.common.gamelogic.BaseGameLogic;
+import com.common.gamelogic.EndOfGame;
 import com.common.player.BasePlayer;
 import com.games.TypeOfTurn;
 
@@ -12,19 +14,27 @@ import java.util.List;
 
 import static com.games.TypeOfTurn.*;
 
+/**
+ * Класс Дурака
+ */
 public class FoolLogic extends BaseGameLogic {
 
-    ArrayList<tupleOfCard> table;
+    ArrayList<TupleOfCard> table;
     CardImpl trump;
     int uncoveredCard;
     boolean deckEmpty;
     boolean trumpGiven;
-    String[] defaultTurn = new String[]{CHECK_HAND.getType(),
+    final String[] defaultTurn = new String[]{CHECK_HAND.getType(),
             CHECK_TABLE.getType(),
             CHECK_TRUMP.getType(),
             THROW_CARD.getType(),
             PASS.getType()};
 
+    /**
+     * Создание игры
+     * @param players игроки, которые участвуют
+     * @param deck колода для игры
+     */
     public FoolLogic(BasePlayer[] players, Deck deck) {
         super(players, deck);
         giveCardToPlayers(6);
@@ -51,12 +61,12 @@ public class FoolLogic extends BaseGameLogic {
     protected boolean defineEndOfGame() {
         int count = checkEnd();
         if (count == 0) {
-            sendToUser(new String[]{EndOfGame.Tie.getMsg()});
+            sendToUser(new String[]{EndOfGame.TIE.getMsg()});
             return true;
         } else if (count == 1) {
             for (BasePlayer player : players) {
                 if (player.hand.size() != 0) {
-                    sendToUser(new String[]{EndOfGame.Lose.getMsg()});
+                    sendToUser(new String[]{EndOfGame.LOSE.getMsg()});
                     return true;
                 }
             }
@@ -110,36 +120,36 @@ public class FoolLogic extends BaseGameLogic {
             while (player.hand.size() < 6) {
                 if (deck.isEmpty()) {
                     deckEmpty = true;
-                    player.TakeCard(trump);
+                    player.takeCard(trump);
                     trumpGiven = true;
                     break;
                 }
-                player.TakeCard(deck.giveNext());
+                player.takeCard(deck.giveNext());
             }
         }
     }
 
     private boolean makeTurn(boolean possiblePass, int currentPlayer, AttackOrDefend turn) {
-        sendToUser(new String[]{turn.getMsg(), AnswerToPlayer.Player.getMsg() + players[currentPlayer].name + AnswerToPlayer.MakeTurn.getMsg()});
+        sendToUser(new String[]{turn.getMsg(), AnswerToPlayer.PLAYER.getMsg() + players[currentPlayer].name + AnswerToPlayer.MAKE_TURN.getMsg()});
         while (true) {
             sendToUser(defaultTurn);
             TypeOfTurn command = pickTurn(Integer.parseInt(getFromUser()));
             switch (command) {
-                case CHECK_HAND -> sendToUser(players[currentPlayer].ShowHand().toArray(new String[0]));
+                case CHECK_HAND -> sendToUser(players[currentPlayer].showHand().toArray(new String[0]));
                 case CHECK_TABLE -> {
                     if (table.size() == 0) {
-                        sendToUser(new String[]{AnswerToPlayer.TableEmpty.getMsg()});
+                        sendToUser(new String[]{AnswerToPlayer.TABLE_EMPTY.getMsg()});
                         continue;
                     }
-                    for (tupleOfCard card : table) {
+                    for (TupleOfCard card : table) {
                         sendToUser(new String[]{card.toString()});
                     }
                 }
                 case CHECK_TRUMP -> sendToUser(new String[]{trump.cardSuitAndRank()});
                 case THROW_CARD -> {
                     List<String> msg = new ArrayList<>();
-                    msg.add(AnswerToPlayer.WhereThrow.getMsg());
-                    msg.addAll(players[currentPlayer].ShowHand());
+                    msg.add(AnswerToPlayer.WHERE_THROW.getMsg());
+                    msg.addAll(players[currentPlayer].showHand());
                     msg.add(BACK.getType());
                     sendToUser(msg.toArray(new String[0]));
                     int numberOfCardOnHand = Integer.parseInt(getFromUser()) - 1;
@@ -147,31 +157,31 @@ public class FoolLogic extends BaseGameLogic {
                     CardImpl playerCard = players[currentPlayer].hand.get(numberOfCardOnHand);
                     if (turn == AttackOrDefend.ATTACK) {
                         if (checkMoveCorrectness(playerCard)) {
-                            sendToUser(new String[]{AnswerToPlayer.TryAnotherCard.getMsg()});
+                            sendToUser(new String[]{AnswerToPlayer.TRY_ANOTHER_CARD.getMsg()});
                             continue;
                         }
-                        table.add(new tupleOfCard(playerCard));
-                        players[currentPlayer].RemoveCard(numberOfCardOnHand);
+                        table.add(new TupleOfCard(this, playerCard));
+                        players[currentPlayer].removeCard(numberOfCardOnHand);
                         possiblePass = true;
                         uncoveredCard++;
                         if (table.size() == 6) {
-                            sendToUser(new String[]{AnswerToPlayer.TableFull.getMsg()});
+                            sendToUser(new String[]{AnswerToPlayer.TABLE_FULL.getMsg()});
                         }
-                        sendToUser(new String[]{AnswerToPlayer.DoesPlayerEnd.getMsg()});
+                        sendToUser(new String[]{AnswerToPlayer.DOES_PLAYER_END.getMsg()});
                         String answer = getFromUser();
                         if (answer.equals("y")) {
                             return true;
                         }
                     } else {
-                        sendToUser(new String[]{AnswerToPlayer.WhereThrow.getMsg()});
+                        sendToUser(new String[]{AnswerToPlayer.WHERE_THROW.getMsg()});
                         for (int i = 0; i < table.size(); i++) {
-                            if (table.get(i).second != null) continue;
+                            if (table.get(i).secondCard != null) continue;
                             sendToUser(new String[]{i + 1 + ". " + table.get(i).toString()});
                         }
                         int numberOfCardOnTable = Integer.parseInt(getFromUser()) - 1;
                         Cover(table.get(numberOfCardOnTable), playerCard);
-                        if (table.get(numberOfCardOnTable).second == null) continue;
-                        players[currentPlayer].RemoveCard(numberOfCardOnHand);
+                        if (table.get(numberOfCardOnTable).secondCard == null) continue;
+                        players[currentPlayer].removeCard(numberOfCardOnHand);
                         uncoveredCard--;
                         if (uncoveredCard == 0) return false;
                     }
@@ -179,12 +189,12 @@ public class FoolLogic extends BaseGameLogic {
                 case PASS -> {
                     if (turn == AttackOrDefend.ATTACK) {
                         if (possiblePass) return true;
-                        sendToUser(new String[]{AnswerToPlayer.StartOfSet.getMsg()});
+                        sendToUser(new String[]{AnswerToPlayer.START_OF_SET.getMsg()});
                     } else {
-                        for (tupleOfCard card : table) {
-                            players[currentPlayer].TakeCard(card.first);
-                            if (card.second != null)
-                                players[currentPlayer].TakeCard(card.second);
+                        for (TupleOfCard card : table) {
+                            players[currentPlayer].takeCard(card.firstCard);
+                            if (card.secondCard != null)
+                                players[currentPlayer].takeCard(card.secondCard);
                         }
                         return true;
                     }
@@ -193,12 +203,12 @@ public class FoolLogic extends BaseGameLogic {
         }
     }
 
-    private void Cover(tupleOfCard cardFirst, CardImpl cardSecond) {
+    private void Cover(TupleOfCard cardFirst, CardImpl cardSecond) {
         if (cardFirst.isCover(cardSecond)) {
             cardFirst.coverWithCard(cardSecond);
             return;
         }
-        sendToUser(new String[]{AnswerToPlayer.NotPossibleTurn.getMsg()});
+        sendToUser(new String[]{AnswerToPlayer.NOT_POSSIBLE_TURN.getMsg()});
     }
 
     @Override
@@ -207,54 +217,14 @@ public class FoolLogic extends BaseGameLogic {
         if (table.size() == 0) {
             result = false;
         } else {
-            for (tupleOfCard tuple : table) {
-                if (tuple.first.CardRank == card.CardRank ||
-                        (tuple.second != null && tuple.second.CardRank == card.CardRank)) {
+            for (TupleOfCard tuple : table) {
+                if (tuple.firstCard.CardRank == card.CardRank ||
+                        (tuple.secondCard != null && tuple.secondCard.CardRank == card.CardRank)) {
                     result = false;
                     break;
                 }
             }
         }
         return result;
-    }
-
-    private class tupleOfCard {
-        public CardImpl first;
-        public CardImpl second;
-
-        public tupleOfCard(CardImpl first) {
-            this.first = first;
-        }
-
-        public boolean isCover(CardImpl second) {
-            if (first.CardSuit == trump.CardSuit)
-                return second.CardSuit == trump.CardSuit && first.CardRank.ordinal() < second.CardRank.ordinal();
-            if (second.CardSuit == trump.CardSuit) return true;
-            return first.CardRank.ordinal() < second.CardRank.ordinal() && first.CardSuit == second.CardSuit;
-        }
-
-        public void coverWithCard(CardImpl card) {
-            this.second = card;
-        }
-
-        public String toString() {
-            if (second == null) return first.cardSuitAndRank() + " \\ " + AnswerToPlayer.Nothing.getMsg();
-            return first.cardSuitAndRank() + " \\ " + second.cardSuitAndRank();
-        }
-    }
-
-    private enum AttackOrDefend {
-        ATTACK("You Attack"),
-        DEFEND("You Defend");
-
-        private final String msg;
-
-        AttackOrDefend(String msg) {
-            this.msg = msg;
-        }
-
-        public String getMsg() {
-            return msg;
-        }
     }
 }

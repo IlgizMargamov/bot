@@ -1,5 +1,7 @@
 package com.common.card;
 
+/**
+ * Тип карты*/
 public enum Rank {
     HIDDEN("Hidden"),
     TWO("2"),
@@ -22,6 +24,7 @@ public enum Rank {
         this.rank = rank;
     }
 
+    /**Получить ранг карты*/
     public String getRank() {
         return rank;
     }

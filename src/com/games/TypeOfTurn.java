@@ -1,5 +1,8 @@
 package com.games;
 
+/**
+ * Тип хода по вводу от пользователя
+ */
 public enum TypeOfTurn {
     BACK("0. Back"),
     CHECK_HAND("1. What on my hand?"),
@@ -16,10 +19,19 @@ public enum TypeOfTurn {
         this.type = type;
     }
 
+    /***
+     * Получение строкового представления типа хода
+     * @return тип хода строкой
+     */
     public String getType() {
         return type;
     }
 
+    /**
+     * Получение типа хода по команде
+     * @param numberOfCommand номер команды
+     * @return ход
+     */
     public static TypeOfTurn pickTurn(int numberOfCommand){
         switch (numberOfCommand){
             case 0 -> {return BACK;}
