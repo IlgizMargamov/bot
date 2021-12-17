@@ -32,7 +32,7 @@ public class PharaohLogic extends BaseGameLogic {
         for (BasePlayer player : players) {
             score.put(player, 0);
         }
-        while (defineWinner()) {
+        while (defineEndOfGame()) {
             startSet();
             countPlayersScore();
             if (lastCard.CardRank == Rank.HIDDEN) {
@@ -187,7 +187,7 @@ public class PharaohLogic extends BaseGameLogic {
     }
 
     @Override
-    protected boolean defineWinner() {
+    protected boolean defineEndOfGame() {
         int count = 0;
         for (BasePlayer player : players) {
             if (score.get(player) < 101) {

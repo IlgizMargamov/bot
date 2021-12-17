@@ -14,7 +14,7 @@ import static com.games.TypeOfTurn.*;
 
 public class FoolLogic extends BaseGameLogic {
 
-    ArrayList<Tuple> table;
+    ArrayList<tupleOfCard> table;
     CardImpl trump;
     int uncoveredCard;
     boolean deckEmpty;
@@ -33,10 +33,13 @@ public class FoolLogic extends BaseGameLogic {
         this.deckEmpty = false;
     }
 
+    /**
+     * Начинает игру
+     */
     public void startGame() {
         currentPlayer = defineFirstPlayer();
         trumpGiven = false;
-        while (!defineWinner()) {
+        while (!defineEndOfGame()) {
             boolean lose = startSet();
             if (lose) movePlayerOn(2);
             else movePlayerOn(1);
@@ -45,7 +48,7 @@ public class FoolLogic extends BaseGameLogic {
     }
 
 
-    protected boolean defineWinner() {
+    protected boolean defineEndOfGame() {
         int count = checkEnd();
         if (count == 0) {
             sendToUser(new String[]{EndOfGame.Tie.getMsg()});
@@ -92,9 +95,9 @@ public class FoolLogic extends BaseGameLogic {
         boolean end;
         makeTurn(false, currentPlayer, AttackOrDefend.ATTACK);
         while (true) {
-            end = makeTurn(false,defendPlayer,AttackOrDefend.DEFEND);
-            makeTurn(true, currentPlayer,AttackOrDefend.ATTACK);
-            if (currentPlayer != attackPlayer2) makeTurn(true, attackPlayer2,AttackOrDefend.ATTACK);
+            end = makeTurn(false, defendPlayer, AttackOrDefend.DEFEND);
+            makeTurn(true, currentPlayer, AttackOrDefend.ATTACK);
+            if (currentPlayer != attackPlayer2) makeTurn(true, attackPlayer2, AttackOrDefend.ATTACK);
             if (end) break;
             if (uncoveredCard == 0) break;
         }
@@ -128,7 +131,7 @@ public class FoolLogic extends BaseGameLogic {
                         sendToUser(new String[]{AnswerToPlayer.TableEmpty.getMsg()});
                         continue;
                     }
-                    for (Tuple card : table) {
+                    for (tupleOfCard card : table) {
                         sendToUser(new String[]{card.toString()});
                     }
                 }
@@ -142,12 +145,12 @@ public class FoolLogic extends BaseGameLogic {
                     int numberOfCardOnHand = Integer.parseInt(getFromUser()) - 1;
                     if (numberOfCardOnHand == -1) continue;
                     CardImpl playerCard = players[currentPlayer].hand.get(numberOfCardOnHand);
-                    if(turn == AttackOrDefend.ATTACK) {
+                    if (turn == AttackOrDefend.ATTACK) {
                         if (checkMoveCorrectness(playerCard)) {
                             sendToUser(new String[]{AnswerToPlayer.TryAnotherCard.getMsg()});
                             continue;
                         }
-                        table.add(new Tuple(playerCard));
+                        table.add(new tupleOfCard(playerCard));
                         players[currentPlayer].RemoveCard(numberOfCardOnHand);
                         possiblePass = true;
                         uncoveredCard++;
@@ -159,15 +162,14 @@ public class FoolLogic extends BaseGameLogic {
                         if (answer.equals("y")) {
                             return true;
                         }
-                    }
-                    else{
+                    } else {
                         sendToUser(new String[]{AnswerToPlayer.WhereThrow.getMsg()});
                         for (int i = 0; i < table.size(); i++) {
                             if (table.get(i).second != null) continue;
                             sendToUser(new String[]{i + 1 + ". " + table.get(i).toString()});
                         }
                         int numberOfCardOnTable = Integer.parseInt(getFromUser()) - 1;
-                        Cover(table.get(numberOfCardOnTable),playerCard);
+                        Cover(table.get(numberOfCardOnTable), playerCard);
                         if (table.get(numberOfCardOnTable).second == null) continue;
                         players[currentPlayer].RemoveCard(numberOfCardOnHand);
                         uncoveredCard--;
@@ -175,12 +177,11 @@ public class FoolLogic extends BaseGameLogic {
                     }
                 }
                 case PASS -> {
-                    if(turn == AttackOrDefend.ATTACK){
+                    if (turn == AttackOrDefend.ATTACK) {
                         if (possiblePass) return true;
                         sendToUser(new String[]{AnswerToPlayer.StartOfSet.getMsg()});
-                    }
-                    else{
-                        for (Tuple card : table) {
+                    } else {
+                        for (tupleOfCard card : table) {
                             players[currentPlayer].TakeCard(card.first);
                             if (card.second != null)
                                 players[currentPlayer].TakeCard(card.second);
@@ -192,8 +193,8 @@ public class FoolLogic extends BaseGameLogic {
         }
     }
 
-    private void Cover(Tuple cardFirst,CardImpl cardSecond){
-        if(cardFirst.isCover(cardSecond)){
+    private void Cover(tupleOfCard cardFirst, CardImpl cardSecond) {
+        if (cardFirst.isCover(cardSecond)) {
             cardFirst.coverWithCard(cardSecond);
             return;
         }
@@ -202,21 +203,26 @@ public class FoolLogic extends BaseGameLogic {
 
     @Override
     protected boolean checkMoveCorrectness(CardImpl card) {
-        if (table.size() == 0) return false;
-        for (Tuple tuple : table) {
-            if (tuple.first.CardRank == card.CardRank ||
-                    (tuple.second != null && tuple.second.CardRank == card.CardRank)) {
-                return false;
+        boolean result = true;
+        if (table.size() == 0) {
+            result = false;
+        } else {
+            for (tupleOfCard tuple : table) {
+                if (tuple.first.CardRank == card.CardRank ||
+                        (tuple.second != null && tuple.second.CardRank == card.CardRank)) {
+                    result = false;
+                    break;
+                }
             }
         }
-        return true;
+        return result;
     }
 
-    private class Tuple {
+    private class tupleOfCard {
         public CardImpl first;
         public CardImpl second;
 
-        public Tuple(CardImpl first) {
+        public tupleOfCard(CardImpl first) {
             this.first = first;
         }
 
@@ -227,7 +233,7 @@ public class FoolLogic extends BaseGameLogic {
             return first.CardRank.ordinal() < second.CardRank.ordinal() && first.CardSuit == second.CardSuit;
         }
 
-        public void coverWithCard(CardImpl card){
+        public void coverWithCard(CardImpl card) {
             this.second = card;
         }
 
@@ -237,13 +243,13 @@ public class FoolLogic extends BaseGameLogic {
         }
     }
 
-    private enum AttackOrDefend{
+    private enum AttackOrDefend {
         ATTACK("You Attack"),
         DEFEND("You Defend");
 
         private final String msg;
 
-        AttackOrDefend(String msg){
+        AttackOrDefend(String msg) {
             this.msg = msg;
         }
 
