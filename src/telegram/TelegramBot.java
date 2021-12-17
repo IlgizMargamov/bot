@@ -2,8 +2,8 @@ package telegram;
 
 import com.common.deck.Deck;
 import com.common.deck.DeckType;
+import com.common.player.BasePlayer;
 import com.games.fool.FoolLogic;
-import com.games.fool.FoolPlayer;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -14,9 +14,6 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import java.util.*;
 
 public class TelegramBot extends TelegramLongPollingBot {
-    public static String input;
-    public static String output;
-
     public FoolLogic gameLogic;
 
     private final String token = "5008512617:AAELuxvMo_D0hg1C8pHiRN52NYWhewlHgAw";
@@ -107,10 +104,9 @@ public class TelegramBot extends TelegramLongPollingBot {
             } else if (messageFromInput.equals(startGame)) {
                 int size = playerNameToChatId.size();
                 if (size < 5) {
-                    FoolPlayer[] players = new FoolPlayer[size];
+                    BasePlayer[] players = new BasePlayer[size];
                     for (int i = 0; i < size; i++) {
-                        Object[] playersName = playerNameToChatId.keySet().toArray();
-                        players[i] = new FoolPlayer(playersName[i].toString());
+                        players[i] = playerList.get(i);
                     }
                     //PharaohLogic game = new PharaohLogic(players, new Deck(DeckType.MEDIUM));
                     GameLogicToBot gameLogicToBot=new GameLogicToBot(this);

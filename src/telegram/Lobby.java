@@ -1,15 +1,17 @@
 package telegram;
 
-import java.util.Map;
+import com.common.player.BasePlayer;
+
+import java.util.List;
 
 public class Lobby {
     public String m_creator;
     public String m_pin;
-    public Map<String, String> m_playerNameToChatId;
+    public List<BasePlayer> m_playerList;
 
-    public Lobby(String creator, String pin, Map<String, String> playerNameToChatId) {
+    public Lobby(String creator, String pin, List<BasePlayer> playersList) {
         m_creator = creator;
         m_pin = pin;
-        m_playerNameToChatId = playerNameToChatId;
+        m_playerList = playersList;
     }
 }

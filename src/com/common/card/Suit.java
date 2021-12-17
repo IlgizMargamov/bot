@@ -1,5 +1,7 @@
 package com.common.card;
 
+/**
+ * Масть карты*/
 public enum Suit {
     HIDDEN("Hidden"),
     DIAMOND("Diamond"),
@@ -13,14 +15,18 @@ public enum Suit {
         this.suit=suit;
     }
 
+    /**
+     * Получить масть */
     public String getSuit(){return suit;}
 
-    public static Suit valuesOf(String number){
+    /**
+     * Получить масть по номеру*/
+    public static Suit valuesOf(int number){
         switch (number){
-            case "1" -> {return DIAMOND;}
-            case "2" -> {return CLUBS;}
-            case "3" -> {return HEARTS;}
-            case "4" -> {return SPADES;}
+            case 1 -> {return CLUBS;}
+            case 2 -> {return DIAMOND;}
+            case 3 -> {return HEARTS;}
+            case 4 -> {return SPADES;}
             default -> {return HIDDEN;}
         }
     }
