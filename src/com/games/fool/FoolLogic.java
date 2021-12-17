@@ -8,6 +8,7 @@ import com.common.player.BasePlayer;
 import com.games.TypeOfTurn;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import static com.games.TypeOfTurn.*;
 
@@ -18,7 +19,11 @@ public class FoolLogic extends BaseGameLogic {
     int uncoveredCard;
     boolean deckEmpty;
     boolean trumpGiven;
-    String[] defaultTurn = new String[]{CHECK_HAND.getString(), CHECK_TABLE.getString(), CHECK_TRUMP.getString(), THROW_CARD.getString(), PASS.getString()};
+    String[] defaultTurn = new String[]{CHECK_HAND.getType(),
+            CHECK_TABLE.getType(),
+            CHECK_TRUMP.getType(),
+            THROW_CARD.getType(),
+            PASS.getType()};
 
     public FoolLogic(BasePlayer[] players, Deck deck) {
         super(players, deck);
@@ -43,12 +48,12 @@ public class FoolLogic extends BaseGameLogic {
     protected boolean defineWinner() {
         int count = checkEnd();
         if (count == 0) {
-            sendToUser(new String[]{"Tie!"});
+            sendToUser(new String[]{EndOfGame.Tie.getMsg()});
             return true;
         } else if (count == 1) {
             for (BasePlayer player : players) {
                 if (player.hand.size() != 0) {
-                    sendToUser(new String[]{player.name + "you lose!"});
+                    sendToUser(new String[]{EndOfGame.Lose.getMsg()});
                     return true;
                 }
             }
@@ -112,15 +117,15 @@ public class FoolLogic extends BaseGameLogic {
     }
 
     private boolean makeTurn(boolean possiblePass, int currentPlayer, AttackOrDefend turn) {
-        sendToUser(new String[]{turn.getMsg(),"Player " + players[currentPlayer].name + " make your turn(type number of command)"});
+        sendToUser(new String[]{turn.getMsg(), AnswerToPlayer.Player.getMsg() + players[currentPlayer].name + AnswerToPlayer.MakeTurn.getMsg()});
         while (true) {
             sendToUser(defaultTurn);
-            TypeOfTurn command = pickTurn(getFromUser());
+            TypeOfTurn command = pickTurn(Integer.parseInt(getFromUser()));
             switch (command) {
                 case CHECK_HAND -> sendToUser(players[currentPlayer].ShowHand().toArray(new String[0]));
                 case CHECK_TABLE -> {
                     if (table.size() == 0) {
-                        sendToUser(new String[]{"Table is empty"});
+                        sendToUser(new String[]{AnswerToPlayer.TableEmpty.getMsg()});
                         continue;
                     }
                     for (Tuple card : table) {
@@ -129,15 +134,17 @@ public class FoolLogic extends BaseGameLogic {
                 }
                 case CHECK_TRUMP -> sendToUser(new String[]{trump.cardSuitAndRank()});
                 case THROW_CARD -> {
-                    sendToUser(new String[]{"What card you want to throw?"});
-                    sendToUser(players[currentPlayer].ShowHand().toArray(new String[0]));
-                    sendToUser(new String[]{"0. Back."});
+                    List<String> msg = new ArrayList<>();
+                    msg.add(AnswerToPlayer.WhereThrow.getMsg());
+                    msg.addAll(players[currentPlayer].ShowHand());
+                    msg.add(BACK.getType());
+                    sendToUser(msg.toArray(new String[0]));
                     int numberOfCardOnHand = Integer.parseInt(getFromUser()) - 1;
                     if (numberOfCardOnHand == -1) continue;
                     CardImpl playerCard = players[currentPlayer].hand.get(numberOfCardOnHand);
                     if(turn == AttackOrDefend.ATTACK) {
                         if (checkMoveCorrectness(playerCard)) {
-                            sendToUser(new String[]{"Try another card"});
+                            sendToUser(new String[]{AnswerToPlayer.TryAnotherCard.getMsg()});
                             continue;
                         }
                         table.add(new Tuple(playerCard));
@@ -145,22 +152,22 @@ public class FoolLogic extends BaseGameLogic {
                         possiblePass = true;
                         uncoveredCard++;
                         if (table.size() == 6) {
-                            sendToUser(new String[]{"Table is full!"});
+                            sendToUser(new String[]{AnswerToPlayer.TableFull.getMsg()});
                         }
-                        sendToUser(new String[]{"Is it all? y/n"});
+                        sendToUser(new String[]{AnswerToPlayer.DoesPlayerEnd.getMsg()});
                         String answer = getFromUser();
                         if (answer.equals("y")) {
                             return true;
                         }
                     }
                     else{
-                        sendToUser(new String[]{"Where you want to throw it?"});
+                        sendToUser(new String[]{AnswerToPlayer.WhereThrow.getMsg()});
                         for (int i = 0; i < table.size(); i++) {
                             if (table.get(i).second != null) continue;
                             sendToUser(new String[]{i + 1 + ". " + table.get(i).toString()});
                         }
                         int numberOfCardOnTable = Integer.parseInt(getFromUser()) - 1;
-                        table.get(numberOfCardOnTable).Cover(playerCard);
+                        Cover(table.get(numberOfCardOnTable),playerCard);
                         if (table.get(numberOfCardOnTable).second == null) continue;
                         players[currentPlayer].RemoveCard(numberOfCardOnHand);
                         uncoveredCard--;
@@ -170,7 +177,7 @@ public class FoolLogic extends BaseGameLogic {
                 case PASS -> {
                     if(turn == AttackOrDefend.ATTACK){
                         if (possiblePass) return true;
-                        sendToUser(new String[]{"It's only start of set!"});
+                        sendToUser(new String[]{AnswerToPlayer.StartOfSet.getMsg()});
                     }
                     else{
                         for (Tuple card : table) {
@@ -183,6 +190,14 @@ public class FoolLogic extends BaseGameLogic {
                 }
             }
         }
+    }
+
+    private void Cover(Tuple cardFirst,CardImpl cardSecond){
+        if(cardFirst.isCover(cardSecond)){
+            cardFirst.coverWithCard(cardSecond);
+            return;
+        }
+        sendToUser(new String[]{AnswerToPlayer.NotPossibleTurn.getMsg()});
     }
 
     @Override
@@ -205,23 +220,19 @@ public class FoolLogic extends BaseGameLogic {
             this.first = first;
         }
 
-        public void Cover(CardImpl second) {
-            if (first.CardSuit == trump.CardSuit) {
-                if (second.CardSuit == trump.CardSuit && first.CardRank.ordinal() < second.CardRank.ordinal()) {
-                    this.second = second;
-                }
-            } else if (second.CardSuit == trump.CardSuit) {
-                this.second = second;
-            } else if (first.CardRank.ordinal() < second.CardRank.ordinal() && first.CardSuit == second.CardSuit) {
-                this.second = second;
-            } else {
-                sendToUser(new String[]{"Not possible turn!"});
-            }
+        public boolean isCover(CardImpl second) {
+            if (first.CardSuit == trump.CardSuit)
+                return second.CardSuit == trump.CardSuit && first.CardRank.ordinal() < second.CardRank.ordinal();
+            if (second.CardSuit == trump.CardSuit) return true;
+            return first.CardRank.ordinal() < second.CardRank.ordinal() && first.CardSuit == second.CardSuit;
         }
 
+        public void coverWithCard(CardImpl card){
+            this.second = card;
+        }
 
         public String toString() {
-            if (second == null) return first.cardSuitAndRank() + " \\ " + "Nothing";
+            if (second == null) return first.cardSuitAndRank() + " \\ " + AnswerToPlayer.Nothing.getMsg();
             return first.cardSuitAndRank() + " \\ " + second.cardSuitAndRank();
         }
     }
@@ -239,6 +250,5 @@ public class FoolLogic extends BaseGameLogic {
         public String getMsg() {
             return msg;
         }
-
     }
 }

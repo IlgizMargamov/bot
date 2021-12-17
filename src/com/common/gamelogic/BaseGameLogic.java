@@ -10,7 +10,7 @@ import java.util.Scanner;
 public abstract class BaseGameLogic implements GameLogic {
 
     protected Deck deck;
-    protected BasePlayer[] players;
+    protected final BasePlayer[] players;
     protected int currentPlayer;
     protected Scanner scanner = new Scanner(System.in);
 
@@ -54,5 +54,46 @@ public abstract class BaseGameLogic implements GameLogic {
 
     protected String getFromUser(){
         return scanner.nextLine();
+    }
+
+    protected enum EndOfGame{
+        Win("You Won"),
+        Lose("You Lose"),
+        Tie("Tie");
+
+        String msg;
+
+        EndOfGame(String msg){
+            this.msg = msg;
+        }
+
+        public String getMsg() {
+            return msg;
+        }
+    }
+
+    protected enum AnswerToPlayer {
+        NotPossibleTurn("Not possible turn!"),
+        StartOfSet("It's only start of set!"),
+        WhereThrow("Where you want to throw it?"),
+        WhatThrow("What card you want to throw?"),
+        DoesPlayerEnd("Is it all? y/n"),
+        TryAnotherCard("Try another card"),
+        TableEmpty("Table is empty"),
+        TableFull("Table is full"),
+        Nothing("Nothing"),
+        Player("Player "),
+        MakeTurn(" make your turn(type number of command)"),
+        ChooseSuit("Choose a next card suit");
+
+        private final String msg;
+
+        AnswerToPlayer(String msg){
+            this.msg = msg;
+        }
+
+        public String getMsg(){
+            return msg;
+        }
     }
 }
