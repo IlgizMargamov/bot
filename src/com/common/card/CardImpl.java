@@ -15,6 +15,13 @@ public class CardImpl implements Card {
         CardRank=rank;
     }
 
+    public Suit getCardSuit(){ return CardSuit;}
+    public Rank getCardRank(){ return CardRank;}
+
+    public String cardSuitAndRank(){
+        return CardSuit + " " + CardRank;
+    }
+
     @Override
     public String toString() {
         return "CardImpl{" +

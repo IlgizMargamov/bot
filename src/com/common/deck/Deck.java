@@ -1,6 +1,5 @@
 package com.common.deck;
 
-import com.common.card.Card;
 import com.common.card.CardImpl;
 import com.common.card.Rank;
 import com.common.card.Suit;
@@ -10,13 +9,17 @@ import java.util.Collections;
 import java.util.List;
 
 public class Deck {
-    public List<Card> Cards;
+    private final List<CardImpl> Cards;
 
     public Deck(DeckType deckType) {
         int cardsCount = deckType.getCardsCount();
         Cards = getSortedDeck(cardsCount);
-
         shuffle(Cards);
+    }
+
+    public Deck(List<CardImpl> oldDeck){
+        this.Cards = oldDeck;
+        shuffle(this.Cards);
     }
 
     @Override
@@ -26,13 +29,12 @@ public class Deck {
                 '}';
     }
 
-    private void shuffle(List<Card> cards){
+    private void shuffle(List<CardImpl> cards){
         Collections.shuffle(cards);
     }
 
-    private List<Card> getSortedDeck(int length) {
-        List<Card> cards=new ArrayList<Card>(length);
-        int i = 0;
+    private List<CardImpl> getSortedDeck(int length) {
+        List<CardImpl> cards= new ArrayList<>(length);
         for (Suit suit : Suit.values()) {
             if (suit == Suit.HIDDEN) continue;
             for (Rank rank : Rank.values()) {
@@ -42,16 +44,19 @@ public class Deck {
                 if (checkCardDeckConditions(length, 24, rank.ordinal(), 8)) continue;
 
                 cards.add(new CardImpl(suit, rank));
-                i++;
             }
         }
         return cards;
     }
 
-    public Card GiveNext(){
-        Card card = Cards.get(Cards.size()-1);
+    public CardImpl giveNext(){
+        CardImpl card = Cards.get(Cards.size()-1);
         Cards.remove(Cards.size()-1);
         return card;
+    }
+
+    public boolean isEmpty(){
+        return Cards.size() == 0;
     }
 
     private boolean checkCardDeckConditions(int cardCount, int exceptionalCardCount, int rankOrdinal, int cardCountControl) {
