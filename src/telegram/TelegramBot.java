@@ -1,9 +1,6 @@
 package telegram;
 
-import com.common.deck.Deck;
-import com.common.deck.DeckType;
 import com.common.player.BasePlayer;
-import com.games.fool.FoolLogic;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -14,14 +11,19 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import java.util.*;
 
 public class TelegramBot extends TelegramLongPollingBot {
-    public FoolLogic gameLogic;
-
-    private final String token = "5008512617:AAELuxvMo_D0hg1C8pHiRN52NYWhewlHgAw";
+    private final String token = "5008512617:AAGrCuVOt6wfZPqQJzxtBp93sTSEYStl5yg";
     private final String botUsername = "Card Games";
 
-    private Map<String, String> playerNameToChatId;
-    private List<Lobby> lobbies=new ArrayList<>();
-    private String[] currentAvailableCommands;
+    private Map<String, String> playerNameToChatId = new HashMap<>(); //
+    private List<Lobby> lobbies = new ArrayList<>();
+
+    private String[] currentAvailableCommands; // for checking if player answered expectedly
+    private final String startCommand = "/start";
+    private final String helpCommand = "/help";
+    private final String createLobbyPharaohCommand = "/create_lobby_pharaoh";
+    private final String createLobbyFoolCommand = "/create_lobby_fool";
+    private final String startGame = "/start_game";
+    private final String joinGameCommand = "/join_game";
 
     @Override
     public String getBotUsername() {
@@ -40,105 +42,106 @@ public class TelegramBot extends TelegramLongPollingBot {
             String chatId = update.getMessage().getChatId().toString();
             String currentUser = update.getMessage().getChat().getUserName();
 
-            String startCommand = "/start";
-            String helpCommand = "/help";
-            String createLobbyPharaohCommand = "/create_lobby_pharaoh";
-            String createLobbyFoolCommand = "/create_lobby_fool";
-            String startGame = "/start_game";
+            if (!playerNameToChatId.containsKey(currentUser)) playerNameToChatId.put(currentUser, chatId);
 
-            // TODO: check from who comes the request; if not awaited chatId then print them "not your turn yet"
+            userAndBotFirstMeeting(messageFromInput, currentUser);
 
-            if (messageFromInput.equals(startCommand)) {
-                ReplyKeyboardMarkup keyboardMarkup = getStartReplyKeyboardMarkup();
-
-                SendMessage sendMessage = SendMessage.builder().chatId(chatId).text("Now you can navigate through buttons").build();
-                sendMessage.setReplyMarkup(keyboardMarkup);
-                try {
-                    execute(sendMessage);
-                } catch (TelegramApiException e) {
-                    e.printStackTrace();
-                }
-            } else if (messageFromInput.equals(helpCommand)) {
-                try {
-                    execute(SendMessage.builder().chatId(chatId).text("This is gonna help you").build());
-                } catch (TelegramApiException e) {
-                    e.printStackTrace();
-                }
-            } else if (messageFromInput.startsWith(createLobbyFoolCommand.substring(0, 10))) {
-                String[] strings = messageFromInput.split("_");
-                Random random=new Random();
-                String pin = "#" + Integer.toHexString(random.nextInt(100000));
-                String creator = currentUser;
-                if (strings[strings.length - 1].equals("fool")) {
-                    playerNameToChatId = new HashMap<>();
-                    playerNameToChatId.put(creator, chatId);
-                    lobbies.add(new Lobby(creator, pin, playerNameToChatId));
-                    try {
-                        execute(SendMessage.builder().chatId(chatId).text("@" + creator + ", tell your friends to get to this bot and enter following pin: " + pin).build());
-                    } catch (TelegramApiException e) {
-                        e.printStackTrace();
-                    }
-                }
-            } else if (messageFromInput.startsWith("#")) {
-                boolean isSuccessful = false;
-                String friendName = "";
+            if (messageFromInput.startsWith("#")) {
+                tryFindLobbyWithGivenPin(messageFromInput, chatId, currentUser);
+            } else {
                 for (Lobby lobby : lobbies) {
-                    if (lobby.m_pin.equals(messageFromInput)) {
-                        lobby.m_playerNameToChatId.put(currentUser,chatId);
-                        isSuccessful = true;
-                        friendName = lobby.m_creator;
-                        break;
+                    if (lobby.m_playerNameToChatId.containsKey(currentUser)) {
+                        lobby.m_playersMessages.add(new Message(currentUser, messageFromInput));
                     }
-                }
-                SendMessage sendMessage;
-                if (!isSuccessful) {
-                  sendMessage=SendMessage.builder().chatId(chatId).text("Try asking your friend the pin once again.\nYou typed: " + messageFromInput).build();
-                } else {
-                    sendMessage=SendMessage.builder().chatId(chatId).text("You have been successfully added to the @" + friendName + " lobby").build();
-                }
-                try {
-                    execute(sendMessage);
-                } catch (TelegramApiException e) {
-                    e.printStackTrace();
-                }
-            } else if (messageFromInput.equals(startGame)) {
-                int size = playerNameToChatId.size();
-                if (size < 5) {
-                    BasePlayer[] players = new BasePlayer[size];
-                    for (int i = 0; i < size; i++) {
-                        players[i] = playerList.get(i);
-                    }
-                    //PharaohLogic game = new PharaohLogic(players, new Deck(DeckType.MEDIUM));
-                    GameLogicToBot gameLogicToBot=new GameLogicToBot(this);
-                    FoolLogic game = new FoolLogic(players, new Deck(DeckType.MEDIUM), gameLogicToBot);
-                    this.gameLogic = game;
-                    this.gameLogic.startGame();
                 }
             }
         }
     }
 
-    public String getInputToGameLogic(){
+    private void tryFindLobbyWithGivenPin(String messageFromInput, String chatId, String currentUser) {
+        boolean isSuccessful = false;
+        String friendName = "";
+        for (Lobby lobby : lobbies) {
+            if (lobby.m_pin.equals(messageFromInput)) {
+                lobby.m_playerNameToChatId.put(currentUser, chatId);
+                isSuccessful = true;
+                friendName = lobby.m_creator;
+                break;
+            }
+        }
+        if (!isSuccessful)
+            sendMessageToUser("Try asking your friend the pin once again.\nYou typed: " + messageFromInput + "\nOr create your own lobby", currentUser);
+        else sendMessageToUser("You have been successfully added to the @" + friendName + " lobby", currentUser);
+    }
+
+    private void userAndBotFirstMeeting(String messageFromInput, String currentUser) {
+        switch (messageFromInput) {
+            case startCommand -> sendAvailableCommandsToUser(currentUser, new String[]{startCommand, helpCommand, createLobbyFoolCommand, createLobbyPharaohCommand, joinGameCommand}, true);
+            case helpCommand -> sendAvailableCommandsToUser(currentUser, new String[]{createLobbyFoolCommand, createLobbyPharaohCommand, joinGameCommand}, true);
+            case createLobbyFoolCommand -> createLobby(currentUser, Game.FOOL);
+            case createLobbyPharaohCommand -> createLobby(currentUser, Game.PHARAOH);
+            case joinGameCommand -> {
+                sendAvailableCommandsToUser(currentUser, new String[]{createLobbyFoolCommand, createLobbyPharaohCommand, joinGameCommand}, true);
+                sendMessageToUser("Please enter the pin from the game you want to enter", currentUser);
+            }
+        }
+    }
+
+    // extract in a class?
+    private void createLobby(String currentUser, Game gameLogic) {
+        Lobby lobby = getLobby(currentUser, gameLogic);
+        startLobbyThread(lobby);
+        lobbies.add(lobby);
+    }
+
+    private void startLobbyThread(Lobby lobby) {
+        Thread lobbyThread = new Thread(lobby);
+        lobbyThread.start();
+    }
+
+    private Lobby getLobby(String currentUser, Game gameLogic) {
+        String pin = getPin();
+        ArrayList<BasePlayer> players = getBasePlayers(currentUser);
+        Lobby lobby = new Lobby(currentUser, playerNameToChatId.get(currentUser), pin, players, new GameLogicToBot(this), gameLogic);
+        return lobby;
+    }
+
+    private ArrayList<BasePlayer> getBasePlayers(String currentUser) {
+        BasePlayer creatorPlayer = new BasePlayer(currentUser);
+        ArrayList<BasePlayer> players = new ArrayList<>();
+        players.add(creatorPlayer);
+        return players;
+    }
+
+    private String getPin() {
+        Random random = new Random();
+        int bound = 100000;
+        String pin = "#" + Integer.toHexString(random.nextInt(bound));
+        return pin;
+    }
+//
+
+    public String getInputToGameLogic() {
         return null;
     }
 
-    public void sendOutputToUser(String playerName, String[] availableCommands){
-        // find player's chatId by playerName
-        currentAvailableCommands=availableCommands;
-        String chatId= playerNameToChatId.get(playerName);
+    /**
+     * Sends output from gameLogic to user through GameLogicToBot
+     *
+     * @param playerName        player to send to
+     * @param availableCommands how player may react
+     * @param commandsInRows    makes each command a row if true
+     */
+    public void sendAvailableCommandsToUser(String playerName, String[] availableCommands, boolean commandsInRows) {
+        currentAvailableCommands = availableCommands; // to know possible answers
+        String chatId = playerNameToChatId.get(playerName); // find player's chatId by playerName
         SendMessage message = SendMessage
                 .builder()
+                .text("Use these buttons for your own comfort") // need to send intended message from here just adding another param
                 .chatId(chatId)
                 .build();
 
-        ReplyKeyboardMarkup replyKeyboardMarkup=new ReplyKeyboardMarkup();
-        List<KeyboardRow> keyboardRows=new ArrayList<>();
-        for (String command : availableCommands){
-            KeyboardRow keyboardRow = new KeyboardRow();
-            keyboardRow.add(command);
-            keyboardRows.add(keyboardRow);
-        }
-        replyKeyboardMarkup.setKeyboard(keyboardRows);
+        ReplyKeyboardMarkup replyKeyboardMarkup = getReplyKeyboardMarkup(availableCommands, commandsInRows);
         message.setReplyMarkup(replyKeyboardMarkup);
 
         try {
@@ -148,25 +151,45 @@ public class TelegramBot extends TelegramLongPollingBot {
         }
     }
 
-    private ReplyKeyboardMarkup getStartReplyKeyboardMarkup() {
+    /**
+     * Gets ReplyKeyboardMarkup using given commands
+     *
+     * @param commands       available to user commands
+     * @param commandsInRows make each command a row
+     * @return ReplyKeyboardMarkup object
+     */
+    private ReplyKeyboardMarkup getReplyKeyboardMarkup(String[] commands, boolean commandsInRows) {
         ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
 
         List<KeyboardRow> keyboardRows = new ArrayList<>();
 
-        KeyboardRow row = new KeyboardRow();
-        row.add("/start");
-        row.add("/help");
-        row.add("/create_lobby_pharaoh");
-        row.add("/create_lobby_fool");
-        row.add("/start_game");
+        if (commandsInRows) {
+            for (String command : commands) {
+                KeyboardRow row = new KeyboardRow();
+                row.add(command);
+                keyboardRows.add(row);
+            }
+        } else {
+            KeyboardRow row = new KeyboardRow();
+            for (String command : commands) {
+                row.add(command);
+            }
+            keyboardRows.add(row);
+        }
 
-        keyboardRows.add(row);
 
         keyboardMarkup.setKeyboard(keyboardRows);
         return keyboardMarkup;
     }
 
-    private void sendMessageToUser(String message, String chatId) {
+    /**
+     * Sends message to user
+     *
+     * @param message    what to send
+     * @param playerName whom to send
+     */
+    private void sendMessageToUser(String message, String playerName) {
+        String chatId = playerNameToChatId.get(playerName);
         SendMessage sendMessage = getSendMessage(message, chatId);
         try {
             execute(sendMessage);
@@ -175,6 +198,13 @@ public class TelegramBot extends TelegramLongPollingBot {
         }
     }
 
+    /**
+     * Creates message to send using targeted chatId and message itself
+     *
+     * @param message message to send
+     * @param chatId  what chat to send to
+     * @return SendMessage object
+     */
     private SendMessage getSendMessage(String message, String chatId) {
         SendMessage sendMessage = SendMessage
                 .builder()

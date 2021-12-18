@@ -1,25 +1,24 @@
 package com;
 
-import com.common.deck.Deck;
 import com.common.deck.DeckType;
-import com.common.gamelogic.BaseGameLogic;
-import com.common.gamelogic.LogicFactory;
-import com.common.player.BasePlayer;
-
-import java.util.Scanner;
+import org.telegram.telegrambots.meta.TelegramBotsApi;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
+import telegram.TelegramBot;
 
 public class Main {
     public static void main(String[] args) {
         // Instantiate Telegram Bots API
-//        TelegramBotsApi botsApi;
-//        TelegramBot bot = new TelegramBot();
-//        try {
-//            botsApi = new TelegramBotsApi(DefaultBotSession.class);
-//            botsApi.registerBot(bot);
-//        } catch (TelegramApiException e) {
-//            e.printStackTrace();
-//        }
+        TelegramBotsApi botsApi;
+        TelegramBot bot = new TelegramBot();
+        try {
+            botsApi = new TelegramBotsApi(DefaultBotSession.class);
+            botsApi.registerBot(bot);
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+        }
 
+/*
         System.out.println("Type a size of deck");
         Scanner scanner = new Scanner(System.in);
         String deckTypeString = scanner.nextLine().split(" ")[0];
@@ -37,6 +36,7 @@ public class Main {
             gameLogic = LogicFactory.getGameLogic(logic, deck, players);
         } while (gameLogic == null); // if null try again
         gameLogic.startGame();
+*/
 //        Bot bot = new Bot(gameLogic);
 //
 //        bot.start();

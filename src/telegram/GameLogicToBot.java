@@ -1,7 +1,7 @@
 package telegram;
 
 public class GameLogicToBot {
-    private TelegramBot m_telegramBot;
+    private final TelegramBot m_telegramBot;
 
     public GameLogicToBot(TelegramBot telegramBot){
         m_telegramBot=telegramBot;
@@ -11,7 +11,13 @@ public class GameLogicToBot {
         return m_telegramBot.getInputToGameLogic();
     }
 
-    public void sendOutputToUser(String playerName, String[] availableCommands){
-        m_telegramBot.sendOutputToUser(playerName, availableCommands);
+    /**
+     * Sends output from gameLogic to user
+     * @param playerName player to send to
+     * @param availableCommands how player may react
+     * @param commandsInRows makes each command a row if true
+     * */
+    public void sendOutputToUser(String playerName, String[] availableCommands, boolean commandsInRows){
+        m_telegramBot.sendAvailableCommandsToUser(playerName, availableCommands, commandsInRows);
     }
 }

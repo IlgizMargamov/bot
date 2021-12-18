@@ -8,6 +8,7 @@ import com.common.gamelogic.BaseGameLogic;
 import com.common.gamelogic.EndOfGame;
 import com.common.player.BasePlayer;
 import com.games.TypeOfTurn;
+import telegram.GameLogicToBot;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +25,7 @@ public class FoolLogic extends BaseGameLogic {
     int uncoveredCard;
     boolean deckEmpty;
     boolean trumpGiven;
+
     final String[] defaultTurn = new String[]{CHECK_HAND.getType(),
             CHECK_TABLE.getType(),
             CHECK_TRUMP.getType(),
@@ -41,6 +43,11 @@ public class FoolLogic extends BaseGameLogic {
         this.table = new ArrayList<>();
         this.uncoveredCard = 0;
         this.deckEmpty = false;
+    }
+
+    public FoolLogic(BasePlayer[] players, Deck deck, GameLogicToBot gameLogicToBot){
+        this(players, deck);
+
     }
 
     /**
