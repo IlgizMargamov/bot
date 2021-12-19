@@ -42,6 +42,7 @@ public enum DeckType {
      * @return type of deck to play
      */
     public static DeckType getDeckType(String deckTypeString) throws IllegalStateException {
+        deckTypeString = deckTypeString.toUpperCase();
         return switch (deckTypeString) {
             case "SMALL" -> DeckType.SMALL;
             case "MEDIUM" -> DeckType.MEDIUM;
