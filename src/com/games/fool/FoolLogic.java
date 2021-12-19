@@ -18,8 +18,7 @@ import static com.games.TypeOfTurn.*;
 /**
  * Класс Дурака
  */
-public class FoolLogic extends BaseGameLogic implements Runnable {
-
+public class FoolLogic extends BaseGameLogic {
     ArrayList<TupleOfCard> table;
     CardImpl trump;
     int uncoveredCard;
@@ -47,7 +46,7 @@ public class FoolLogic extends BaseGameLogic implements Runnable {
 
     public FoolLogic(BasePlayer[] players, Deck deck, GameLogicToBot gameLogicToBot){
         this(players, deck);
-        this.input = gameLogicToBot;
+        this.gameLogicToBot = gameLogicToBot;
     }
 
     /**
@@ -189,7 +188,7 @@ public class FoolLogic extends BaseGameLogic implements Runnable {
                             sendToUser(new String[]{i + 1 + ". " + table.get(i).toString()}, name,true);
                         }
                         int numberOfCardOnTable = Integer.parseInt(getFromUser()) - 1;
-                        Cover(table.get(numberOfCardOnTable), playerCard);
+                        cover(table.get(numberOfCardOnTable), playerCard);
                         if (table.get(numberOfCardOnTable).secondCard == null) continue;
                         players[currentPlayer].removeCard(numberOfCardOnHand);
                         uncoveredCard--;
@@ -213,7 +212,7 @@ public class FoolLogic extends BaseGameLogic implements Runnable {
         }
     }
 
-    private void Cover(TupleOfCard cardFirst, CardImpl cardSecond) {
+    private void cover(TupleOfCard cardFirst, CardImpl cardSecond) {
         if (cardFirst.isCover(cardSecond)) {
             cardFirst.coverWithCard(cardSecond);
             return;

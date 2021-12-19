@@ -9,13 +9,13 @@ import telegram.GameLogicToBot;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-public abstract class BaseGameLogic implements GameLogic {
+public abstract class BaseGameLogic implements GameLogic, Runnable {
 
     protected Deck deck;
     protected final BasePlayer[] players;
     protected int currentPlayer;
     protected Scanner scanner = new Scanner(System.in);
-    protected GameLogicToBot input;
+    protected GameLogicToBot gameLogicToBot;
 
     public BaseGameLogic(BasePlayer[] players, Deck deck) {
         this.deck = deck;
@@ -94,10 +94,10 @@ public abstract class BaseGameLogic implements GameLogic {
             }
             case IN_TELEGRAM -> {
                 if(changeKeyboard){
-                    input.sendOutputToUser(playerName,message,String.join("\n",message),false);
+                    gameLogicToBot.sendOutputToUser(playerName,message,String.join("\n",message),false);
                 }
                 else {
-                    input.sendOutputToUser(playerName, new String[0], String.join("\n", message), false);
+                    gameLogicToBot.sendOutputToUser(playerName, new String[0], String.join("\n", message), false);
                 }
             }
         }
@@ -117,7 +117,7 @@ public abstract class BaseGameLogic implements GameLogic {
                 return scanner.nextLine();
             }
             case IN_TELEGRAM -> {
-                return input.getInputToGameLogic();
+                return gameLogicToBot.getM_inputToGameLogic();
             }
             default -> throw new RuntimeException();
         }

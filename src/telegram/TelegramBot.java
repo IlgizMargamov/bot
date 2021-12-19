@@ -111,11 +111,6 @@ public class TelegramBot extends TelegramLongPollingBot {
         lobbyThread.start();
     }
 
-
-    public String getInputToGameLogic() {
-        return null;
-    }
-
     /**
      * Sends output from gameLogic to user through GameLogicToBot
      *
