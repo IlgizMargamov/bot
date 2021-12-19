@@ -18,6 +18,9 @@ import static com.games.TypeOfTurn.*;
 /**
  * Класс Дурака
  */
+//TODO: Сказать игроку, что он покрылся
+    //TODO: Сказать что перешёл ход
+    //TODO: Сказать кто учавствует в сете
 public class FoolLogic extends BaseGameLogic {
     ArrayList<TupleOfCard> table;
     CardImpl trump;
@@ -46,7 +49,7 @@ public class FoolLogic extends BaseGameLogic {
 
     public FoolLogic(BasePlayer[] players, Deck deck, GameLogicToBot gameLogicToBot){
         this(players, deck);
-        this.gameLogicToBot = gameLogicToBot;
+        this.input = gameLogicToBot;
     }
 
     /**
