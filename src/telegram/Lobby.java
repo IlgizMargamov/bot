@@ -34,6 +34,7 @@ public class Lobby implements Runnable {
     String mediumDeck = DeckType.MEDIUM.toString().toUpperCase();
     String bigDeck = DeckType.BIG.toString().toUpperCase();
     String[] deckTypes = {smallDeck, mediumDeck, bigDeck};
+    private String[] availableCommandsInGame;
 
     public Lobby(String creator, String chatId, String pin, List<BasePlayer> playersList, GameLogicToBot gameLogicToBot, Game wishedGame) {
         m_creator = creator;
@@ -95,16 +96,17 @@ public class Lobby implements Runnable {
                         }
                         switch (m_game) {
                             case FOOL -> {
-                                m_gameLogic = new FoolLogic(getBasePlayerArray(m_playerList), new Deck(m_deckType));
+                                m_gameLogic = new FoolLogic(getBasePlayerArray(m_playerList), new Deck(m_deckType), m_gameLogicToBot);
                                 m_gameLogic.startGame();
                             }
                             case PHARAOH -> {
-                                m_gameLogic = new PharaohLogic(getBasePlayerArray(m_playerList), new Deck(m_deckType));
+                                m_gameLogic = new PharaohLogic(getBasePlayerArray(m_playerList), new Deck(m_deckType), m_gameLogicToBot);
                                 m_gameLogic.startGame();
                             }
                             default -> throw new IllegalStateException();
                         }
                         m_gameStarted = true;
+                        m_gameLogicToBot.sendOutputToAllUsers(m_playerNameToChatId.keySet(), availableCommandsInGame, "Game has started");
                     }
                 } else {
                     m_gameLogicToBot.sendOutputToUser(message.m_playerName, new String[]{"You are playing"}, message.m_message, true);
