@@ -166,7 +166,8 @@ public class Lobby implements Runnable {
         String result = String.format("Lobby creator: %s\n" +
                 "Pin for lobby %s\n" +
                 "Players: " + getPlayersInLobby() +
-                "Game to play: %s", m_creator, m_pin, m_game);
+                "Game to play: %s\n"+
+                "Deck type: %s", m_creator, m_pin, m_game, m_deckType);
 
         return result;
     }

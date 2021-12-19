@@ -66,6 +66,8 @@ public class TelegramBot extends TelegramLongPollingBot {
                 lobby.m_playerNameToChatId.put(currentUser, chatId);
                 isSuccessful = true;
                 friendName = lobby.m_creator;
+                sendOutputToAllUsers(lobby.m_playerNameToChatId.keySet(), currentAvailableCommands,
+                        "@"+currentUser+" have entered the "+"@"+friendName+ " lobby!");
                 break;
             }
         }
@@ -74,11 +76,6 @@ public class TelegramBot extends TelegramLongPollingBot {
                     currentAvailableCommands,
                     "Try asking your friend the pin once again.\nYou typed: " + pin + "\nOr create your own lobby",
                     true );
-
-        else sendOutputToUser(currentUser,
-                currentAvailableCommands,
-                "You have been successfully added to the @" + friendName + " lobby",
-                true );
     }
 
     private void operateWithUserFirstly(String messageFromInput, String currentUser) {

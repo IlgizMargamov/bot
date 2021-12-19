@@ -17,7 +17,7 @@ public abstract class BaseGameLogic implements GameLogic, Runnable {
     protected final BasePlayer[] players;
     protected int currentPlayer;
     protected Scanner scanner = new Scanner(System.in);
-    protected GameLogicToBot input;
+    protected GameLogicToBot gameLogicToBot;
 
     public BaseGameLogic(BasePlayer[] players, Deck deck) {
         this.deck = deck;
@@ -96,10 +96,10 @@ public abstract class BaseGameLogic implements GameLogic, Runnable {
             }
             case IN_TELEGRAM -> {
                 if(changeKeyboard){
-                    input.sendOutputToUser(playerName,message,String.join("\n",message),true);
+                    gameLogicToBot.sendOutputToUser(playerName,message,String.join("\n",message),false);
                 }
                 else {
-                    input.sendOutputToUser(playerName, new String[0], String.join("\n", message), true);
+                    gameLogicToBot.sendOutputToUser(playerName, new String[0], String.join("\n", message), false);
                 }
             }
         }
@@ -110,7 +110,7 @@ public abstract class BaseGameLogic implements GameLogic, Runnable {
         for (BasePlayer player:players) {
             set.add(player.name);
         }
-        input.sendOutputToAllUsers(set,new String[0],String.join("\n",message));
+        gameLogicToBot.sendOutputToAllUsers(set,new String[0],String.join("\n",message));
     }
 
     /**
@@ -123,7 +123,7 @@ public abstract class BaseGameLogic implements GameLogic, Runnable {
                 return scanner.nextLine();
             }
             case IN_TELEGRAM -> {
-                return input.getInputToGameLogic();
+                return gameLogicToBot.getInputToGameLogic();
             }
             default -> throw new RuntimeException();
         }
