@@ -8,6 +8,7 @@ import com.common.gamelogic.AnswerToPlayer;
 import com.common.gamelogic.BaseGameLogic;
 import com.common.player.BasePlayer;
 import com.games.TypeOfTurn;
+import telegram.GameLogicToBot;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -37,6 +38,11 @@ public class PharaohLogic extends BaseGameLogic {
         this.score = new HashMap<>();
     }
 
+    public PharaohLogic(BasePlayer[] players, Deck deck, GameLogicToBot gameLogicToBot){
+        this(players,deck);
+        input = gameLogicToBot;
+    }
+
     public void startGame() {
         for (BasePlayer player : players) {
             score.put(player, 0);
@@ -48,11 +54,9 @@ public class PharaohLogic extends BaseGameLogic {
                 score.replace(players[(currentPlayer - 1) % players.length],
                         score.get(players[(currentPlayer - 1) % players.length]) - 20);
             }
-            ArrayList<String> message = new ArrayList<>();
             for (BasePlayer player : score.keySet()) {
-                message.add(player.name + " : " + score.get(player));
+                sendToUser(new String[]{player.name + " : " + score.get(player)},player.name,false);
             }
-            sendToUser(message.toArray(new String[0]));
         }
     }
 
@@ -70,7 +74,7 @@ public class PharaohLogic extends BaseGameLogic {
                             Suit.CLUBS.getSuit(),
                             Suit.DIAMOND.getSuit(),
                             Suit.HEARTS.getSuit(),
-                            Suit.SPADES.getSuit()});
+                            Suit.SPADES.getSuit()},players[currentPlayer].name,false);
                     Suit pickedSuit;
                     do {
                         pickedSuit = Suit.valuesOf(Integer.parseInt(getFromUser()));
@@ -108,19 +112,20 @@ public class PharaohLogic extends BaseGameLogic {
     }
 
     protected boolean makeTurn() {
-        sendToUser(new String[]{AnswerToPlayer.PLAYER.getMsg() + players[currentPlayer].name + AnswerToPlayer.MAKE_TURN.getMsg()});
+        String playerName = players[currentPlayer].name;
+        sendToUser(new String[]{AnswerToPlayer.PLAYER.getMsg() + playerName + AnswerToPlayer.MAKE_TURN.getMsg()}, playerName,false);
         boolean take = true;
         while (true) {
-            if (take) sendToUser(withoutPass);
-            else sendToUser(withPass);
+            if (take) sendToUser(withoutPass,playerName,true);
+            else sendToUser(withPass,playerName,true);
             TypeOfTurn command = TypeOfTurn.pickTurn(Integer.parseInt(getFromUser()));
 
             switch (command) {
                 case CHECK_HAND -> players[currentPlayer].showHand();
                 case CHECK_TABLE -> {
                     Rank rank = lastCard.CardRank;
-                    if (rank == Rank.HIDDEN) sendToUser(new String[]{lastCard.CardSuit.getSuit()});
-                    else sendToUser(new String[]{lastCard.CardSuit + " " + rank});
+                    if (rank == Rank.HIDDEN) sendToUser(new String[]{lastCard.CardSuit.getSuit()},playerName,false);
+                    else sendToUser(new String[]{lastCard.CardSuit + " " + rank},playerName,false);
                 }
                 case THROW_CARD -> {
                     boolean endTurn = throwCard();
@@ -144,7 +149,7 @@ public class PharaohLogic extends BaseGameLogic {
         message.add(AnswerToPlayer.WHAT_THROW.getMsg());
         message.addAll(players[currentPlayer].showHand());
         message.add(BACK.getType());
-        sendToUser(message.toArray(new String[0]));
+        sendToUser(message.toArray(new String[0]),players[currentPlayer].name,true);
         CardImpl playerCard;
         int numberOfCardOnHand;
         while (true) {
@@ -152,7 +157,7 @@ public class PharaohLogic extends BaseGameLogic {
             if (numberOfCardOnHand == -1) return false;
             playerCard = players[currentPlayer].hand.get(numberOfCardOnHand);
             if (checkMoveCorrectness(playerCard)) {
-                sendToUser(new String[]{AnswerToPlayer.TRY_ANOTHER_CARD.getMsg()});
+                sendToUser(new String[]{AnswerToPlayer.TRY_ANOTHER_CARD.getMsg()},players[currentPlayer].name,false);
                 continue;
             }
             break;
