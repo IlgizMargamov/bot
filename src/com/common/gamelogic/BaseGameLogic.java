@@ -117,7 +117,7 @@ public abstract class BaseGameLogic implements GameLogic, Runnable {
                 return scanner.nextLine();
             }
             case IN_TELEGRAM -> {
-                return gameLogicToBot.getM_inputToGameLogic();
+                return gameLogicToBot.getInputToGameLogic();
             }
             default -> throw new RuntimeException();
         }

@@ -127,9 +127,10 @@ public class TelegramBot extends TelegramLongPollingBot {
                 .text(text)
                 .chatId(chatId)
                 .build();
-
-        ReplyKeyboardMarkup replyKeyboardMarkup = getReplyKeyboardMarkup(availableCommands, commandsInRows);
-        message.setReplyMarkup(replyKeyboardMarkup);
+        if (availableCommands.length !=0) {
+            ReplyKeyboardMarkup replyKeyboardMarkup = getReplyKeyboardMarkup(availableCommands, commandsInRows);
+            message.setReplyMarkup(replyKeyboardMarkup);
+        }
 
         try {
             execute(message);

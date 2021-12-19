@@ -106,12 +106,14 @@ public class Lobby implements Runnable {
                         m_gameLogicToBot.sendOutputToAllUsers(m_playerNameToChatId.keySet(), m_availableCommandsInGame, "Game has started");
                     }
                 } else { // in-game logic
+                    m_expectedPlayer=m_gameLogicToBot.getCurrentPlayer();
+                    m_availableCommandsInGame=m_gameLogicToBot.getAvailableCommands();
                     if (message.m_playerName.equals(m_expectedPlayer)) {
                         //sendOutputToUser(message.m_playerName, new String[]{"You are playing"}, message.m_message, true);
                         boolean correctCommand=false;
                         for (String availableCommand : m_availableCommandsInGame){
                             if (availableCommand.equals(message.m_message)) {
-                                sendInputToGameLogic(message.m_message);
+                                sendInputToGameLogic(message.m_message.charAt(0));
                                 correctCommand=true;
                                 break;
                             }
@@ -127,7 +129,6 @@ public class Lobby implements Runnable {
                                 "Not your turn yet.\nPlease, wait",
                                 true);
                     }
-
                 }
             }
             try {
@@ -138,7 +139,7 @@ public class Lobby implements Runnable {
         }
     }
 
-    private void sendInputToGameLogic(String m_message){
+    private void sendInputToGameLogic(char m_message){
         m_gameLogicToBot.setInputMessage(m_message);
     }
 

@@ -48,7 +48,6 @@ public class BasePlayer implements Player {
             var a = hand.get(i);
             array.add(i + 1 + ". " + a.CardSuit + " " +a.CardRank);
         }
-        array.add("");
         return array;
     }
 

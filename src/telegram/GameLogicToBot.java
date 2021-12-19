@@ -6,13 +6,24 @@ public class GameLogicToBot {
     private final TelegramBot m_telegramBot;
 
     private String m_inputToGameLogic;
+    private String m_currentPlayer;
+    private String[] m_availableCommands;
 
     public GameLogicToBot(TelegramBot telegramBot) {
         m_telegramBot = telegramBot;
     }
 
-    public String getM_inputToGameLogic() {
-        return m_inputToGameLogic;
+    public String getInputToGameLogic() {
+        while (m_inputToGameLogic == null){
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        String tmp=m_inputToGameLogic;
+        m_inputToGameLogic=null;
+        return tmp;
     }
 
     /**
@@ -24,6 +35,8 @@ public class GameLogicToBot {
      * @param commandsInRows    makes each command a row if true
      */
     public void sendOutputToUser(String playerName, String[] availableCommands, String text, boolean commandsInRows) {
+        m_currentPlayer=playerName;
+        m_availableCommands=availableCommands;
         m_telegramBot.sendOutputToUser(playerName, availableCommands, text, commandsInRows);
     }
 
@@ -38,7 +51,10 @@ public class GameLogicToBot {
         m_telegramBot.sendOutputToAllUsers(playersName, availableCommands, text);
     }
 
-    public void setInputMessage(String m_message) {
-        m_inputToGameLogic = m_message;
+    public void setInputMessage(char m_message) {
+        m_inputToGameLogic = String.valueOf(m_message);
     }
+
+    public String getCurrentPlayer(){ return m_currentPlayer;}
+    public String[] getAvailableCommands(){return m_availableCommands;}
 }
