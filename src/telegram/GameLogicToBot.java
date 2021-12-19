@@ -15,9 +15,10 @@ public class GameLogicToBot {
      * Sends output from gameLogic to user
      * @param playerName player to send to
      * @param availableCommands how player may react
+     * @param text what to send to player
      * @param commandsInRows makes each command a row if true
      * */
-    public void sendOutputToUser(String playerName, String[] availableCommands, boolean commandsInRows){
-        m_telegramBot.sendAvailableCommandsToUser(playerName, availableCommands, commandsInRows);
+    public void sendOutputToUser(String playerName, String[] availableCommands, String text, boolean commandsInRows){
+        m_telegramBot.sendOutputToUser(playerName, availableCommands, text, commandsInRows);
     }
 }

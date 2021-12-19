@@ -21,4 +21,32 @@ public enum DeckType {
     public int getCardsCount(){
         return this.m_cards;
     }
+
+    /**
+     * Get deckType by number of cards
+     * @param deckTypeInt input number of cards from user
+     * @return type of deck to play
+     */
+    public static DeckType getDeckType(int deckTypeInt) throws IllegalStateException {
+        return switch (deckTypeInt) {
+            case 24 -> DeckType.SMALL;
+            case 36 -> DeckType.MEDIUM;
+            case 52 -> DeckType.BIG;
+            default -> throw new IllegalStateException("Unexpected value: " + deckTypeInt);
+        };
+    }
+
+    /**
+     * Get deckType by name of deck type
+     * @param deckTypeString input number of cards from user
+     * @return type of deck to play
+     */
+    public static DeckType getDeckType(String deckTypeString) throws IllegalStateException {
+        return switch (deckTypeString) {
+            case "SMALL" -> DeckType.SMALL;
+            case "MEDIUM" -> DeckType.MEDIUM;
+            case "BIG" -> DeckType.BIG;
+            default -> throw new IllegalStateException("Unexpected value: " + deckTypeString);
+        };
+    }
 }
