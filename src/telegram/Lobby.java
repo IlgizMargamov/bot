@@ -84,8 +84,8 @@ public class Lobby implements Runnable {
                     for (String deckType : deckTypes) {
                         if (isEquals(message, deckType)) {
                             m_deckType = DeckType.getDeckType(deckType);
-                            sendOutputToUser(message.m_playerName, availableCommands,
-                                    "You have established deck size to be " + m_deckType, true);
+                            m_gameLogicToBot.sendOutputToAllUsers(m_playerNameToChatId.keySet(),
+                                    availableCommands, "Deck type has been set to: "+m_deckType+" by @"+message.m_playerName);
                             break;
                         }
                     }
