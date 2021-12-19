@@ -4,22 +4,24 @@ package com.common.gamelogic;
  * Варианты ответа пользователю
  */
 public enum AnswerToPlayer {
-    NOT_POSSIBLE_TURN("Not possible turn!"),
-    START_OF_SET("It's only start of set!"),
-    WHERE_THROW("Where you want to throw it?"),
-    WHAT_THROW("What card you want to throw?"),
+    CHOOSE_SUIT("Choose a next card suit"),
     DOES_PLAYER_END("Is it all? y/n"),
-    TRY_ANOTHER_CARD("Try another card"),
+    END_OF_TURN("Your turn has ended"),
+    MAKE_TURN(" make your turn(type number of command)"),
+    NOTHING("Nothing"),
+    NOT_POSSIBLE_TURN("Not possible turn!"),
+    NOW_PLAY("Now play: "),
+    PLAYER("Player "),
+    START_OF_SET("It's only start of set!"),
     TABLE_EMPTY("Table is empty"),
     TABLE_FULL("Table is full"),
-    NOTHING("Nothing"),
-    PLAYER("Player "),
-    MAKE_TURN(" make your turn(type number of command)"),
-    CHOOSE_SUIT("Choose a next card suit");
+    TRY_ANOTHER_CARD("Try another card"),
+    WHAT_THROW("What card you want to throw?"),
+    WHERE_THROW("Where you want to throw it?");
 
     private final String msg;
 
-    AnswerToPlayer(String msg){
+    AnswerToPlayer(String msg) {
         this.msg = msg;
     }
 
@@ -27,7 +29,7 @@ public enum AnswerToPlayer {
      * Получение сообщения пользователю
      * @return сообщение пользователю
      */
-    public String getMsg(){
+    public String getMsg() {
         return msg;
     }
 }

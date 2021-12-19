@@ -11,16 +11,13 @@ import com.games.TypeOfTurn;
 import telegram.GameLogicToBot;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import static com.games.TypeOfTurn.*;
 
 /**
  * Класс Дурака
  */
-//TODO: Сказать игроку, что он покрылся
-    //TODO: Сказать что перешёл ход
-    //TODO: Сказать кто учавствует в сете
+
 public class FoolLogic extends BaseGameLogic {
     ArrayList<TupleOfCard> table;
     CardImpl trump;
@@ -49,7 +46,7 @@ public class FoolLogic extends BaseGameLogic {
 
     public FoolLogic(BasePlayer[] players, Deck deck, GameLogicToBot gameLogicToBot){
         this(players, deck);
-        this.input = gameLogicToBot;
+        this.gameLogicToBot = gameLogicToBot;
     }
 
     /**
@@ -111,8 +108,10 @@ public class FoolLogic extends BaseGameLogic {
 
     @Override
     protected boolean startSet() {
+        uncoveredCard = 0;
         int attackPlayer2 = (currentPlayer + 2) % players.length;
         int defendPlayer = (currentPlayer + 1) % players.length;
+        sendToAll(new String[]{AnswerToPlayer.NOW_PLAY.getMsg(),players[currentPlayer].name,players[defendPlayer].name,players[attackPlayer2].name});
         boolean end;
         makeTurn(false, currentPlayer, AttackOrDefend.ATTACK);
         while (true) {
@@ -159,9 +158,8 @@ public class FoolLogic extends BaseGameLogic {
                 }
                 case CHECK_TRUMP -> sendToUser(new String[]{trump.cardSuitAndRank()}, name,false);
                 case THROW_CARD -> {
-                    List<String> msg = new ArrayList<>();
-                    msg.add(AnswerToPlayer.WHERE_THROW.getMsg());
-                    msg.addAll(players[currentPlayer].showHand());
+                    sendToUser(new String[]{AnswerToPlayer.WHAT_THROW.getMsg()},name,false);
+                    ArrayList<String> msg = new ArrayList<>(players[currentPlayer].showHand());
                     msg.add(BACK.getType());
                     sendToUser(msg.toArray(new String[0]), name,true);
                     int numberOfCardOnHand = Integer.parseInt(getFromUser()) - 1;
@@ -182,6 +180,7 @@ public class FoolLogic extends BaseGameLogic {
                         sendToUser(new String[]{YES.getType(), NO.getType()}, name,true);
                         TypeOfTurn answer = TypeOfTurn.pickTurn(Integer.parseInt(getFromUser()));
                         if (answer == YES) {
+                            sendToUser(new String[]{AnswerToPlayer.END_OF_TURN.getMsg()},name,false);
                             return true;
                         }
                     } else {
@@ -195,12 +194,18 @@ public class FoolLogic extends BaseGameLogic {
                         if (table.get(numberOfCardOnTable).secondCard == null) continue;
                         players[currentPlayer].removeCard(numberOfCardOnHand);
                         uncoveredCard--;
-                        if (uncoveredCard == 0) return false;
+                        if (uncoveredCard == 0) {
+                            sendToUser(new String[]{AnswerToPlayer.END_OF_TURN.getMsg()},name,false);
+                            return false;
+                        }
                     }
                 }
                 case PASS -> {
                     if (turn == AttackOrDefend.ATTACK) {
-                        if (possiblePass) return true;
+                        if (possiblePass) {
+                            sendToUser(new String[]{AnswerToPlayer.END_OF_TURN.getMsg()},name,false);
+                            return true;
+                        }
                         sendToUser(new String[]{AnswerToPlayer.START_OF_SET.getMsg()},name,false);
                     } else {
                         for (TupleOfCard card : table) {
@@ -208,6 +213,7 @@ public class FoolLogic extends BaseGameLogic {
                             if (card.secondCard != null)
                                 players[currentPlayer].takeCard(card.secondCard);
                         }
+                        sendToUser(new String[]{AnswerToPlayer.END_OF_TURN.getMsg()},name,false);
                         return true;
                     }
                 }
