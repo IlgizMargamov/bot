@@ -111,11 +111,6 @@ public class TelegramBot extends TelegramLongPollingBot {
         lobbyThread.start();
     }
 
-
-    public String getInputToGameLogic() {
-        return null;
-    }
-
     /**
      * Sends output from gameLogic to user through GameLogicToBot
      *
@@ -132,9 +127,10 @@ public class TelegramBot extends TelegramLongPollingBot {
                 .text(text)
                 .chatId(chatId)
                 .build();
-
-        ReplyKeyboardMarkup replyKeyboardMarkup = getReplyKeyboardMarkup(availableCommands, commandsInRows);
-        message.setReplyMarkup(replyKeyboardMarkup);
+        if (availableCommands.length !=0) {
+            ReplyKeyboardMarkup replyKeyboardMarkup = getReplyKeyboardMarkup(availableCommands, commandsInRows);
+            message.setReplyMarkup(replyKeyboardMarkup);
+        }
 
         try {
             execute(message);

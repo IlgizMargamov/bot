@@ -11,7 +11,7 @@ import java.util.HashSet;
 import java.util.Scanner;
 import java.util.Set;
 
-public abstract class BaseGameLogic implements GameLogic {
+public abstract class BaseGameLogic implements GameLogic, Runnable {
 
     protected Deck deck;
     protected final BasePlayer[] players;
@@ -96,10 +96,10 @@ public abstract class BaseGameLogic implements GameLogic {
             }
             case IN_TELEGRAM -> {
                 if(changeKeyboard){
-                    input.sendOutputToUser(playerName,message,String.join("\n",message),true);
+                    input.sendOutputToUser(playerName,message,String.join("\n",message),false);
                 }
                 else {
-                    input.sendOutputToUser(playerName, new String[0], String.join("\n", message), true);
+                    input.sendOutputToUser(playerName, new String[0], String.join("\n", message), false);
                 }
             }
         }
