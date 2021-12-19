@@ -40,7 +40,7 @@ public class PharaohLogic extends BaseGameLogic {
 
     public PharaohLogic(BasePlayer[] players, Deck deck, GameLogicToBot gameLogicToBot){
         this(players,deck);
-        this.gameLogicToBot = gameLogicToBot;
+        this.input = gameLogicToBot;
     }
 
     public void startGame() {
