@@ -106,6 +106,7 @@ public class Lobby implements Runnable {
                         m_gameLogicToBot.sendOutputToAllUsers(m_playerNameToChatId.keySet(), m_availableCommandsInGame, "Game has started");
                     }
                 } else { // in-game logic
+                    if (message.m_message.startsWith("/start")) continue;
                     m_expectedPlayer=m_gameLogicToBot.getCurrentPlayer();
                     m_availableCommandsInGame=m_gameLogicToBot.getAvailableCommands();
                     if (message.m_playerName.equals(m_expectedPlayer)) {
