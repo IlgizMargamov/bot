@@ -11,6 +11,8 @@ public enum TypeOfTurn {
     THROW_CARD("4. Throw this card."),
     PASS("5. Pass"),
     TAKE("6. Take"),
+    YES("7. Yes"),
+    NO("8. No"),
     NOTHING("Nothing");
 
     private final String type;
@@ -41,6 +43,8 @@ public enum TypeOfTurn {
             case 4 -> {return THROW_CARD;}
             case 5 -> {return PASS;}
             case 6 -> {return TAKE;}
+            case 7 -> {return YES;}
+            case 8 -> {return NO;}
             default -> {return NOTHING;}
         }
     }

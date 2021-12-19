@@ -68,7 +68,7 @@ public class FoolLogic extends BaseGameLogic implements Runnable {
     protected boolean defineEndOfGame() {
         int count = checkEnd();
         if (count == 0) {
-            sendToUser(new String[]{EndOfGame.TIE.getMsg()},players[currentPlayer].name,false);
+            sendToAll(new String[]{EndOfGame.TIE.getMsg()});
             return true;
         } else if (count == 1) {
             for (BasePlayer player : players) {
@@ -177,9 +177,9 @@ public class FoolLogic extends BaseGameLogic implements Runnable {
                         if (table.size() == 6) {
                             sendToUser(new String[]{AnswerToPlayer.TABLE_FULL.getMsg()}, name,false);
                         }
-                        sendToUser(new String[]{AnswerToPlayer.DOES_PLAYER_END.getMsg()}, name,false);
-                        String answer = getFromUser();
-                        if (answer.equals("y")) {
+                        sendToUser(new String[]{YES.getType(), NO.getType()}, name,true);
+                        TypeOfTurn answer = TypeOfTurn.pickTurn(Integer.parseInt(getFromUser()));
+                        if (answer == YES) {
                             return true;
                         }
                     } else {

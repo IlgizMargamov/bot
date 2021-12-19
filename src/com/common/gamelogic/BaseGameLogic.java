@@ -7,7 +7,9 @@ import com.common.player.BasePlayer;
 import telegram.GameLogicToBot;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Scanner;
+import java.util.Set;
 
 public abstract class BaseGameLogic implements GameLogic {
 
@@ -94,17 +96,21 @@ public abstract class BaseGameLogic implements GameLogic {
             }
             case IN_TELEGRAM -> {
                 if(changeKeyboard){
-                    input.sendOutputToUser(playerName,message,String.join("\n",message),false);
+                    input.sendOutputToUser(playerName,message,String.join("\n",message),true);
                 }
                 else {
-                    input.sendOutputToUser(playerName, new String[0], String.join("\n", message), false);
+                    input.sendOutputToUser(playerName, new String[0], String.join("\n", message), true);
                 }
             }
         }
     }
 
-    protected void sendToAll(){
-
+    protected void sendToAll(String[] message){
+        Set<String> set = new HashSet<>();
+        for (BasePlayer player:players) {
+            set.add(player.name);
+        }
+        input.sendOutputToAllUsers(set,new String[0],String.join("\n",message));
     }
 
     /**
