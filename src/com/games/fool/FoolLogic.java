@@ -111,7 +111,8 @@ public class FoolLogic extends BaseGameLogic {
         uncoveredCard = 0;
         int attackPlayer2 = (currentPlayer + 2) % players.length;
         int defendPlayer = (currentPlayer + 1) % players.length;
-        sendToAll(new String[]{AnswerToPlayer.NOW_PLAY.getMsg(),players[currentPlayer].name,players[defendPlayer].name,players[attackPlayer2].name});
+        if(attackPlayer2 == currentPlayer) sendToAll(new String[]{AnswerToPlayer.NOW_PLAY.getMsg(),players[currentPlayer].name,players[defendPlayer].name,players[attackPlayer2].name});
+        else sendToAll(new String[]{AnswerToPlayer.NOW_PLAY.getMsg(),players[currentPlayer].name,players[defendPlayer].name});
         boolean end;
         makeTurn(false, currentPlayer, AttackOrDefend.ATTACK);
         while (true) {
