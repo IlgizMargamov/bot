@@ -161,9 +161,8 @@ public class Lobby implements Runnable {
     }
 
     private void sendOutputToUser(String playerName, String[] availableCommands, String text, boolean commandsInRows) {
-        //m_expectedPlayer = playerName;
         m_availableCommandsInGame = availableCommands;
-        m_gameLogicToBot.sendOutputToUser(playerName, availableCommands, text, commandsInRows);
+        m_gameLogicToBot.sendOutputToUser(playerName, availableCommands, text, commandsInRows, false);
     }
 
     private BasePlayer[] getBasePlayerArray(List<BasePlayer> playerList) {
