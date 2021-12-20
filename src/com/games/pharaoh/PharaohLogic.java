@@ -68,7 +68,7 @@ public class PharaohLogic extends BaseGameLogic {
         movePlayerOn(1);
         do {
             boolean madeTurn = makeTurn();
-            if (lastCard.CardRank != Rank.SIX)
+            if (lastCard.CardRank != Rank.SIX && lastCard.CardRank != Rank.LADY)
                 sendToUser(new String[]{AnswerToPlayer.END_OF_TURN.getMsg()}, players[currentPlayer].name, false);
             if (madeTurn) {
                 if (lastCard.CardRank == Rank.LADY) {
@@ -83,6 +83,7 @@ public class PharaohLogic extends BaseGameLogic {
                     } while (pickedSuit == Suit.HIDDEN);
                     lastCard = new CardImpl(pickedSuit, Rank.HIDDEN);
                     movePlayerOn(1);
+                    sendToUser(new String[]{AnswerToPlayer.END_OF_TURN.getMsg()}, players[currentPlayer].name, false);
                     continue;
                 } else if (lastCard.CardRank == Rank.ACE) {
                     sendToUser(new String[]{AnswerToPlayer.SKIP_THE_TURN.getMsg()}, players[(currentPlayer + 1) % players.length].name, false);
@@ -138,6 +139,7 @@ public class PharaohLogic extends BaseGameLogic {
                 case TAKE -> {
                     if (take) {
                         players[currentPlayer].takeCard(deck.giveNext());
+                        sendToUser(new String[]{players[currentPlayer].getLastCard().cardSuitAndRank()},playerName,false);
                         take = false;
                     }
                 }

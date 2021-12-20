@@ -18,7 +18,7 @@ public class CardImpl implements Card {
      * @param rank ранг карты
      */
     public CardImpl(Suit suit, Rank rank) {
-        if (suit == Suit.HIDDEN || rank == Rank.HIDDEN) throw new IllegalArgumentException();
+        //if (suit == Suit.HIDDEN || rank == Rank.HIDDEN) throw new IllegalArgumentException();
         CardSuit = suit;
         CardRank = rank;
     }

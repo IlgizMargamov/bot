@@ -9,6 +9,8 @@ import com.games.pharaoh.PharaohLogic;
 
 import java.util.*;
 
+
+//TODO: Парсить команды до точки.
 public class Lobby implements Runnable {
     public String m_creator;
     public String m_pin;
@@ -112,9 +114,15 @@ public class Lobby implements Runnable {
                             default -> throw new IllegalStateException();
                         }
                         m_gameThread = new Thread(m_gameLogic);
-                        m_gameThread.start();
                         m_gameStarted = true;
                         m_gameLogicToBot.sendOutputToAllUsers(m_playerNameToChatId.keySet(), m_availableCommandsInGame, "Game has started");
+                        try {
+                            Thread.sleep(50);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        m_gameThread.start();
+
                     }
                 } else { // in-game logic
                     if (message.m_message.startsWith("/start")) continue;
@@ -122,7 +130,7 @@ public class Lobby implements Runnable {
                     m_availableCommandsInGame = m_gameLogicToBot.getAvailableCommands();
                     if (isEquals(message, quitGameCommand)) {
                         m_gameStarted=false;
-                        sendOutputToUser(message.m_playerName, availableCommands, "You left "+m_creator+ "lobby", true);
+                        sendOutputToUser(message.m_playerName, availableCommands, "You left @"+m_creator+ " lobby", true);
                         return;
                     }
                     if (message.m_playerName.equals(m_expectedPlayer)) { // message from the awaited player
@@ -157,6 +165,7 @@ public class Lobby implements Runnable {
     }
 
     private void sendInputToGameLogic(char m_message) {
+        if (m_message=='/') return;
         m_gameLogicToBot.setInputMessage(m_message);
     }
 
