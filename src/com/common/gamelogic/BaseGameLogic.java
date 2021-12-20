@@ -96,10 +96,10 @@ public abstract class BaseGameLogic implements GameLogic, Runnable {
             }
             case IN_TELEGRAM -> {
                 if(changeKeyboard){
-                    gameLogicToBot.sendOutputToUser(playerName,message,String.join("\n",message),true);
+                    gameLogicToBot.sendOutputToUser(playerName,message,String.join("\n",message),true, true);
                 }
                 else {
-                    gameLogicToBot.sendOutputToUser(playerName, new String[0], String.join("\n", message), true);
+                    gameLogicToBot.sendOutputToUser(playerName, new String[0], String.join("\n", message), true, true);
                 }
             }
         }
