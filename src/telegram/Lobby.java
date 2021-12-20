@@ -31,11 +31,16 @@ public class Lobby implements Runnable {
     private final String showGameInfoCommand = "/show_game";
     private final String startGameCommand = "/start_game";
     private final String establishDeckType = "/establish_deck_type";
-    String[] availableCommands = {helpCommand, pinCommand, showPlayersCommand, showGameInfoCommand, establishDeckType, startGameCommand};
-    String smallDeck = DeckType.SMALL.toString().toUpperCase();
-    String mediumDeck = DeckType.MEDIUM.toString().toUpperCase();
-    String bigDeck = DeckType.BIG.toString().toUpperCase();
-    String[] deckTypes = {smallDeck, mediumDeck, bigDeck};
+    private final String whatIsTrumpCommand="/what_is_trump";
+    private final String whatOnTheTableCommand="/what_on_table";
+    private final String cardsInDeckCommand ="/cards_in_deck";
+    // TODO: implement these commands
+    private final String[] m_defaultCommands ={whatIsTrumpCommand, whatOnTheTableCommand, cardsInDeckCommand};
+    private final String smallDeck = DeckType.SMALL.toString().toUpperCase();
+    private final String mediumDeck = DeckType.MEDIUM.toString().toUpperCase();
+    private final String bigDeck = DeckType.BIG.toString().toUpperCase();
+    private final String[] deckTypes = {smallDeck, mediumDeck, bigDeck};
+    private String[] availableCommands = {helpCommand, pinCommand, showPlayersCommand, showGameInfoCommand, establishDeckType, startGameCommand};
 
     public Lobby(String creator, String chatId, String pin, List<BasePlayer> playersList, GameLogicToBot gameLogicToBot, Game wishedGame) {
         m_creator = creator;
@@ -109,7 +114,7 @@ public class Lobby implements Runnable {
                     if (message.m_message.startsWith("/start")) continue;
                     m_expectedPlayer=m_gameLogicToBot.getCurrentPlayer();
                     m_availableCommandsInGame=m_gameLogicToBot.getAvailableCommands();
-                    if (message.m_playerName.equals(m_expectedPlayer)) {
+                    if (message.m_playerName.equals(m_expectedPlayer)) { // message from the awaited player
                         //sendOutputToUser(message.m_playerName, new String[]{"You are playing"}, message.m_message, true);
                         boolean correctCommand=false;
                         for (String availableCommand : m_availableCommandsInGame){
@@ -121,12 +126,12 @@ public class Lobby implements Runnable {
                         }
                         if (!correctCommand)
                             sendOutputToUser(message.m_playerName,
-                                    m_availableCommandsInGame,
+                                    m_defaultCommands,
                                     "Wrong command.\nTry again,please",
                                     true);
                     } else {
                         sendOutputToUser(message.m_playerName,
-                                m_availableCommandsInGame,
+                                m_defaultCommands,
                                 "Not your turn yet.\nPlease, wait",
                                 true);
                     }
@@ -145,7 +150,7 @@ public class Lobby implements Runnable {
     }
 
     private void sendOutputToUser(String playerName, String[] availableCommands, String text, boolean commandsInRows) {
-        m_expectedPlayer = playerName;
+        //m_expectedPlayer = playerName;
         m_availableCommandsInGame=availableCommands;
         m_gameLogicToBot.sendOutputToUser(playerName, availableCommands, text, commandsInRows);
     }
