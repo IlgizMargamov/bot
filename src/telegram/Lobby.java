@@ -23,6 +23,7 @@ public class Lobby implements Runnable {
     private boolean m_gameStarted;
     private String m_expectedPlayer;
     private String[] m_availableCommandsInGame;
+    private Thread m_gameThread;
 
     private final String createCommand = "/create";
     private final String pinCommand = "/pin";
@@ -31,16 +32,17 @@ public class Lobby implements Runnable {
     private final String showGameInfoCommand = "/show_game";
     private final String startGameCommand = "/start_game";
     private final String establishDeckType = "/establish_deck_type";
-    private final String whatIsTrumpCommand="/what_is_trump";
-    private final String whatOnTheTableCommand="/what_on_table";
-    private final String cardsInDeckCommand ="/cards_in_deck";
-    // TODO: implement these commands
-    private final String[] m_defaultCommands ={whatIsTrumpCommand, whatOnTheTableCommand, cardsInDeckCommand};
+    private final String whatIsTrumpCommand = "/what_is_trump";
+    private final String whatOnTheTableCommand = "/what_on_table";
+    private final String cardsInDeckCommand = "/cards_in_deck";
+    private final String leaveLobbyCommand = "/leave_lobby";
+    private final String quitGameCommand = "/quit_game";
+    private final String[] m_defaultCommands = {whatIsTrumpCommand, whatOnTheTableCommand, cardsInDeckCommand, quitGameCommand};
     private final String smallDeck = DeckType.SMALL.toString().toUpperCase();
     private final String mediumDeck = DeckType.MEDIUM.toString().toUpperCase();
     private final String bigDeck = DeckType.BIG.toString().toUpperCase();
     private final String[] deckTypes = {smallDeck, mediumDeck, bigDeck};
-    private String[] availableCommands = {helpCommand, pinCommand, showPlayersCommand, showGameInfoCommand, establishDeckType, startGameCommand};
+    private String[] availableCommands = {helpCommand, pinCommand, showPlayersCommand, showGameInfoCommand, establishDeckType, startGameCommand, leaveLobbyCommand};
 
     public Lobby(String creator, String chatId, String pin, List<BasePlayer> playersList, GameLogicToBot gameLogicToBot, Game wishedGame) {
         m_creator = creator;
@@ -67,6 +69,10 @@ public class Lobby implements Runnable {
                                 true);
                         continue; // to skip first message to lobby for each player
                     }
+                    if (isEquals(message, leaveLobbyCommand)) {
+                        sendOutputToUser(message.m_playerName, availableCommands, "You leaved from " + m_creator + " lobby", true);
+                        m_playerNameToChatId.remove(message.m_playerName);
+                    }
                     if (isEquals(message, pinCommand))
                         sendOutputToUser(message.m_playerName,
                                 availableCommands,
@@ -90,7 +96,7 @@ public class Lobby implements Runnable {
                         if (isEquals(message, deckType)) {
                             m_deckType = DeckType.getDeckType(deckType);
                             m_gameLogicToBot.sendOutputToAllUsers(m_playerNameToChatId.keySet(),
-                                    availableCommands, "Deck type has been set to: "+m_deckType+" by @"+message.m_playerName);
+                                    availableCommands, "Deck type has been set to: " + m_deckType + " by @" + message.m_playerName);
                             break;
                         }
                     }
@@ -105,22 +111,27 @@ public class Lobby implements Runnable {
                             case PHARAOH -> m_gameLogic = new PharaohLogic(getBasePlayerArray(m_playerList), new Deck(m_deckType), m_gameLogicToBot);
                             default -> throw new IllegalStateException();
                         }
-                        Thread gameLogicThread = new Thread(m_gameLogic);
-                        gameLogicThread.start();
+                        m_gameThread = new Thread(m_gameLogic);
+                        m_gameThread.start();
                         m_gameStarted = true;
                         m_gameLogicToBot.sendOutputToAllUsers(m_playerNameToChatId.keySet(), m_availableCommandsInGame, "Game has started");
                     }
                 } else { // in-game logic
                     if (message.m_message.startsWith("/start")) continue;
-                    m_expectedPlayer=m_gameLogicToBot.getCurrentPlayer();
-                    m_availableCommandsInGame=m_gameLogicToBot.getAvailableCommands();
+                    m_expectedPlayer = m_gameLogicToBot.getCurrentPlayer();
+                    m_availableCommandsInGame = m_gameLogicToBot.getAvailableCommands();
+                    if (isEquals(message, quitGameCommand)) {
+                        m_gameStarted=false;
+                        sendOutputToUser(message.m_playerName, availableCommands, "You left "+m_creator+ "lobby", true);
+                        return;
+                    }
                     if (message.m_playerName.equals(m_expectedPlayer)) { // message from the awaited player
                         //sendOutputToUser(message.m_playerName, new String[]{"You are playing"}, message.m_message, true);
-                        boolean correctCommand=false;
-                        for (String availableCommand : m_availableCommandsInGame){
+                        boolean correctCommand = false;
+                        for (String availableCommand : m_availableCommandsInGame) {
                             if (availableCommand.equals(message.m_message)) {
                                 sendInputToGameLogic(message.m_message.charAt(0));
-                                correctCommand=true;
+                                correctCommand = true;
                                 break;
                             }
                         }
@@ -145,13 +156,13 @@ public class Lobby implements Runnable {
         }
     }
 
-    private void sendInputToGameLogic(char m_message){
+    private void sendInputToGameLogic(char m_message) {
         m_gameLogicToBot.setInputMessage(m_message);
     }
 
     private void sendOutputToUser(String playerName, String[] availableCommands, String text, boolean commandsInRows) {
         //m_expectedPlayer = playerName;
-        m_availableCommandsInGame=availableCommands;
+        m_availableCommandsInGame = availableCommands;
         m_gameLogicToBot.sendOutputToUser(playerName, availableCommands, text, commandsInRows);
     }
 
@@ -172,7 +183,7 @@ public class Lobby implements Runnable {
         String result = String.format("Lobby creator: %s\n" +
                 "Pin for lobby %s\n" +
                 "Players: " + getPlayersInLobby() +
-                "Game to play: %s\n"+
+                "Game to play: %s\n" +
                 "Deck type: %s", m_creator, m_pin, m_game, m_deckType);
 
         return result;
