@@ -23,6 +23,7 @@ public class TelegramBot extends TelegramLongPollingBot {
     private final String createLobbyFoolCommand = "/create_lobby_fool";
     private final String startGame = "/start_game";
     private final String joinGameCommand = "/join_game";
+    private final String[] standardCommands = {startCommand, helpCommand, createLobbyFoolCommand, createLobbyPharaohCommand, joinGameCommand};
 
     @Override
     public String getBotUsername() {
@@ -58,6 +59,15 @@ public class TelegramBot extends TelegramLongPollingBot {
 
     }
 
+    public void killLobby(String pin){
+        for (Lobby lobby : lobbies){
+            if (Objects.equals(lobby.m_pin, pin)){
+                sendOutputToAllUsers(lobby.m_playerNameToChatId.keySet(), standardCommands, "Lobby deleted");
+                lobbies.remove(lobby);
+            }
+        }
+    }
+
     private void tryFindLobbyWithGivenPin(String pin, String chatId, String currentUser) {
         boolean isSuccessful = false;
         String friendName = "";
@@ -81,7 +91,7 @@ public class TelegramBot extends TelegramLongPollingBot {
     private void operateWithUserFirstly(String messageFromInput, String currentUser) {
         switch (messageFromInput) {
             case startCommand -> sendOutputToUser(currentUser,
-                    new String[]{startCommand, helpCommand, createLobbyFoolCommand, createLobbyPharaohCommand, joinGameCommand},
+                    standardCommands,
                     "Here are your available commands", true);
             case helpCommand -> sendOutputToUser(currentUser,
                     new String[]{createLobbyFoolCommand, createLobbyPharaohCommand, joinGameCommand},

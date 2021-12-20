@@ -114,6 +114,7 @@ public class Lobby implements Runnable {
                             default -> throw new IllegalStateException();
                         }
                         m_gameThread = new Thread(m_gameLogic);
+                        m_gameThread.start();
                         m_gameStarted = true;
                         m_gameLogicToBot.sendOutputToAllUsers(m_playerNameToChatId.keySet(), m_availableCommandsInGame, "Game has started");
                         try {
@@ -130,7 +131,8 @@ public class Lobby implements Runnable {
                     m_availableCommandsInGame = m_gameLogicToBot.getAvailableCommands();
                     if (isEquals(message, quitGameCommand)) {
                         m_gameStarted=false;
-                        sendOutputToUser(message.m_playerName, availableCommands, "You left @"+m_creator+ " lobby", true);
+                        sendOutputToUser(message.m_playerName, availableCommands, "You left "+m_creator+ "lobby", true);
+                        m_gameLogicToBot.killLobby(m_pin);
                         return;
                     }
                     if (message.m_playerName.equals(m_expectedPlayer)) { // message from the awaited player
@@ -165,7 +167,6 @@ public class Lobby implements Runnable {
     }
 
     private void sendInputToGameLogic(char m_message) {
-        if (m_message=='/') return;
         m_gameLogicToBot.setInputMessage(m_message);
     }
 
