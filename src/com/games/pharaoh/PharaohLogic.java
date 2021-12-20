@@ -7,13 +7,13 @@ import com.common.deck.Deck;
 import com.common.gamelogic.AnswerToPlayer;
 import com.common.gamelogic.BaseGameLogic;
 import com.common.player.BasePlayer;
-import com.games.TypeOfTurn;
+import com.games.TypeOfCommand;
 import telegram.GameLogicToBot;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import static com.games.TypeOfTurn.*;
+import static com.games.TypeOfCommand.*;
 
 /**
  * Логика 101
@@ -123,7 +123,7 @@ public class PharaohLogic extends BaseGameLogic {
         while (true) {
             if (take) sendToUser(withoutPass, playerName, true);
             else sendToUser(withPass, playerName, true);
-            TypeOfTurn command = TypeOfTurn.pickTurn(Integer.parseInt(getFromUser()));
+            TypeOfCommand command = TypeOfCommand.pickTurn(Integer.parseInt(getFromUser()));
             switch (command) {
                 case CHECK_HAND -> sendToUser(players[currentPlayer].showHand().toArray(new String[0]), playerName, false);
                 case CHECK_TABLE -> {

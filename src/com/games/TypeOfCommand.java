@@ -3,7 +3,7 @@ package com.games;
 /**
  * Тип хода по вводу от пользователя
  */
-public enum TypeOfTurn {
+public enum TypeOfCommand {
     BACK("0. Back"),
     CHECK_HAND("1. What on my hand?"),
     CHECK_TABLE("2. What on the table?"),
@@ -18,7 +18,7 @@ public enum TypeOfTurn {
 
     private final String type;
 
-    TypeOfTurn(String type){
+    TypeOfCommand(String type){
         this.type = type;
     }
 
@@ -35,7 +35,7 @@ public enum TypeOfTurn {
      * @param numberOfCommand номер команды
      * @return ход
      */
-    public static TypeOfTurn pickTurn(int numberOfCommand){
+    public static TypeOfCommand pickTurn(int numberOfCommand){
         switch (numberOfCommand){
             case 0 -> {return BACK;}
             case 1 -> {return CHECK_HAND;}
@@ -46,6 +46,7 @@ public enum TypeOfTurn {
             case 6 -> {return TAKE;}
             case 7 -> {return YES;}
             case 8 -> {return NO;}
+            case 9 -> {return DECK_SIZE;}
             default -> {return NOTHING;}
         }
     }

@@ -7,13 +7,13 @@ import com.common.gamelogic.AnswerToPlayer;
 import com.common.gamelogic.BaseGameLogic;
 import com.common.gamelogic.EndOfGame;
 import com.common.player.BasePlayer;
-import com.games.TypeOfTurn;
+import com.games.TypeOfCommand;
 import telegram.GameLogicToBot;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.games.TypeOfTurn.*;
+import static com.games.TypeOfCommand.*;
 
 /**
  * Класс Дурака
@@ -144,7 +144,7 @@ public class FoolLogic extends BaseGameLogic {
         sendToUser(new String[]{turn.getMsg(), AnswerToPlayer.PLAYER.getMsg() + name + AnswerToPlayer.MAKE_TURN.getMsg()}, name,false);
         while (true) {
             sendToUser(defaultTurn, name,true);
-            TypeOfTurn command = pickTurn(Integer.parseInt(getFromUser()));
+            TypeOfCommand command = pickTurn(Integer.parseInt(getFromUser()));
             switch (command) {
                 case CHECK_HAND -> sendToUser(players[currentPlayer].showHand().toArray(new String[0]), name,true);
                 case CHECK_TABLE -> {
@@ -179,7 +179,7 @@ public class FoolLogic extends BaseGameLogic {
                         }
                         sendToUser(new String[]{AnswerToPlayer.DOES_PLAYER_END.getMsg()},name,false);
                         sendToUser(new String[]{YES.getType(), NO.getType()}, name,true);
-                        TypeOfTurn answer = TypeOfTurn.pickTurn(Integer.parseInt(getFromUser()));
+                        TypeOfCommand answer = TypeOfCommand.pickTurn(Integer.parseInt(getFromUser()));
                         if (answer == YES) {
                             sendToUser(new String[]{AnswerToPlayer.END_OF_TURN.getMsg()},name,false);
                             return true;
