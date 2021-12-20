@@ -56,6 +56,7 @@ public class GameLogicToBot {
         m_inputToGameLogic = String.valueOf(m_message);
     }
 
+    public void killLobby(String pin){ m_telegramBot.killLobby(pin);}
     public String getCurrentPlayer(){ return m_currentPlayer;}
     public String[] getAvailableCommands(){return m_availableCommands;}
 }

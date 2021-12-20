@@ -123,6 +123,7 @@ public class Lobby implements Runnable {
                     if (isEquals(message, quitGameCommand)) {
                         m_gameStarted=false;
                         sendOutputToUser(message.m_playerName, availableCommands, "You left "+m_creator+ "lobby", true);
+                        m_gameLogicToBot.killLobby(m_pin);
                         return;
                     }
                     if (message.m_playerName.equals(m_expectedPlayer)) { // message from the awaited player
