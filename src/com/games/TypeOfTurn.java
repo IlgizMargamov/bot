@@ -13,6 +13,7 @@ public enum TypeOfTurn {
     TAKE("6. Take"),
     YES("7. Yes"),
     NO("8. No"),
+    DECK_SIZE("9. How many card in deck?"),
     NOTHING("Nothing");
 
     private final String type;

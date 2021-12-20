@@ -17,7 +17,10 @@ public enum AnswerToPlayer {
     TABLE_FULL("Table is full"),
     TRY_ANOTHER_CARD("Try another card"),
     WHAT_THROW("What card you want to throw?"),
-    WHERE_THROW("Where you want to throw it?");
+    WHERE_THROW("Where you want to throw it?"),
+    YOU_TAKE_5_CARD("You take 5 card"),
+    YOU_TAKE_2_CARD("You take 2 card"),
+    SKIP_THE_TURN("You skip the turn");
 
     private final String msg;
 

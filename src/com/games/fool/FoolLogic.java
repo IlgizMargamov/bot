@@ -11,6 +11,7 @@ import com.games.TypeOfTurn;
 import telegram.GameLogicToBot;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import static com.games.TypeOfTurn.*;
 
@@ -29,7 +30,8 @@ public class FoolLogic extends BaseGameLogic {
             CHECK_TABLE.getType(),
             CHECK_TRUMP.getType(),
             THROW_CARD.getType(),
-            PASS.getType()};
+            PASS.getType(),
+            DECK_SIZE.getType()};
 
     /**
      * Создание игры
@@ -63,7 +65,6 @@ public class FoolLogic extends BaseGameLogic {
         }
     }
 
-
     protected boolean defineEndOfGame() {
         int count = checkEnd();
         if (count == 0) {
@@ -79,8 +80,6 @@ public class FoolLogic extends BaseGameLogic {
         }
         return false;
     }
-
-
 
     private int checkEnd() {
         int count = 0;
@@ -178,6 +177,7 @@ public class FoolLogic extends BaseGameLogic {
                         if (table.size() == 6) {
                             sendToUser(new String[]{AnswerToPlayer.TABLE_FULL.getMsg()}, name,false);
                         }
+                        sendToUser(new String[]{AnswerToPlayer.DOES_PLAYER_END.getMsg()},name,false);
                         sendToUser(new String[]{YES.getType(), NO.getType()}, name,true);
                         TypeOfTurn answer = TypeOfTurn.pickTurn(Integer.parseInt(getFromUser()));
                         if (answer == YES) {
@@ -186,10 +186,12 @@ public class FoolLogic extends BaseGameLogic {
                         }
                     } else {
                         sendToUser(new String[]{AnswerToPlayer.WHERE_THROW.getMsg()}, name,false);
+                        List<String> message = new ArrayList<>();
                         for (int i = 0; i < table.size(); i++) {
                             if (table.get(i).secondCard != null) continue;
-                            sendToUser(new String[]{i + 1 + ". " + table.get(i).toString()}, name,true);
+                            message.add(i + 1 + ". " + table.get(i).toString());
                         }
+                        sendToUser(message.toArray(new String[0]),name,true);
                         int numberOfCardOnTable = Integer.parseInt(getFromUser()) - 1;
                         cover(table.get(numberOfCardOnTable), playerCard);
                         if (table.get(numberOfCardOnTable).secondCard == null) continue;
@@ -218,6 +220,7 @@ public class FoolLogic extends BaseGameLogic {
                         return true;
                     }
                 }
+                case DECK_SIZE -> sendToUser(new String[]{String.valueOf(deck.getSize())},name,false);
             }
         }
     }
