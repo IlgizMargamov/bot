@@ -2,6 +2,8 @@ package telegram;
 
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
+import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
@@ -56,15 +58,16 @@ public class TelegramBot extends TelegramLongPollingBot {
                             return;
                         }
                     }
-                } operateWithUserFirstly(messageFromInput, currentUser);
+                }
+                operateWithUserFirstly(messageFromInput, currentUser);
             }
         }
 
     }
 
-    public void killLobby(String pin){
-        for (Lobby lobby : lobbies){
-            if (Objects.equals(lobby.m_pin, pin)){
+    public void killLobby(String pin) {
+        for (Lobby lobby : lobbies) {
+            if (Objects.equals(lobby.m_pin, pin)) {
                 sendOutputToAllUsers(lobby.m_playerNameToChatId.keySet(), standardCommands, LOBBY_DELETED.getMsg());
                 lobbies.remove(lobby);
             }
@@ -80,19 +83,15 @@ public class TelegramBot extends TelegramLongPollingBot {
                 isSuccessful = true;
                 friendName = lobby.m_creator;
                 sendOutputToAllUsers(lobby.m_playerNameToChatId.keySet(), currentAvailableCommands,
-                        AT.getMsg()+currentUser+HAVE_ENTERED.getMsg()+AT.getMsg()+friendName+ LOBBY.getMsg());
+                        AT.getMsg() + currentUser + HAVE_ENTERED.getMsg() + AT.getMsg() + friendName + LOBBY.getMsg());
                 break;
             }
         }
         if (!isSuccessful)
             sendOutputToUser(currentUser,
                     currentAvailableCommands,
-                     TRY_ASK_AGAIN.getMsg() + pin + OR_CREATE_YOUR_OWN.getMsg(),
-                    true );
-    }
-
-    public void sendSticker(String cardName, String ownerName){
-        //SendMessage.builder().
+                    TRY_ASK_AGAIN.getMsg() + pin + OR_CREATE_YOUR_OWN.getMsg(),
+                    true);
     }
 
     private void operateWithUserFirstly(String messageFromInput, String currentUser) {
@@ -108,12 +107,11 @@ public class TelegramBot extends TelegramLongPollingBot {
             case joinGameCommand -> {
                 sendOutputToUser(currentUser,
                         new String[]{createLobbyFoolCommand, createLobbyPharaohCommand, joinGameCommand},
-                        PLEASE_ENTER_PIN.getMsg()+OR_CREATE_YOUR_OWN.getMsg(), true);
+                        PLEASE_ENTER_PIN.getMsg() + OR_CREATE_YOUR_OWN.getMsg(), true);
             }
         }
     }
 
-    // extract in a class?
     private void createLobby(String currentUser, Game gameLogic) {
         Lobby lobby = LobbyCreator.getLobby(currentUser, playerNameToChatId.get(currentUser), gameLogic, this);
         startLobbyThread(lobby);
@@ -141,7 +139,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                 .text(text)
                 .chatId(chatId)
                 .build();
-        if (availableCommands.length !=0) {
+        if (availableCommands.length != 0) {
             ReplyKeyboardMarkup replyKeyboardMarkup = getReplyKeyboardMarkup(availableCommands, commandsInRows);
             message.setReplyMarkup(replyKeyboardMarkup);
         }
@@ -153,9 +151,30 @@ public class TelegramBot extends TelegramLongPollingBot {
         }
     }
 
-    public void sendOutputToAllUsers(Set<String> players, String[] availableCommands, String text){
-        for (String playerName : players){
+    /**
+     * Send text to specified set of players
+     *
+     * @param players           specified players
+     * @param availableCommands available commands
+     * @param text              text to show
+     */
+    public void sendOutputToAllUsers(Set<String> players, String[] availableCommands, String text) {
+        for (String playerName : players) {
             sendOutputToUser(playerName, availableCommands, text, true);
+        }
+    }
+
+
+    /**
+     * Send photo to a group of players
+     *
+     * @param players   specified players
+     * @param file      card photo to send
+     * @param ownerName who sent
+     */
+    public void sendPhoto(Set<String> players, InputFile file, String ownerName) {
+        for (String playerName : players) {
+            SendPhoto.builder().chatId(playerNameToChatId.get(playerName)).photo(file).caption(ownerName + WHO_SENT_THIS_CARD.getMsg()).build();
         }
     }
 
