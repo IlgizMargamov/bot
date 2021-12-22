@@ -9,6 +9,8 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.util.*;
 
+import static com.common.gamelogic.AnswerToPlayer.*;
+
 public class TelegramBot extends TelegramLongPollingBot {
     private final String token = "5008512617:AAGrCuVOt6wfZPqQJzxtBp93sTSEYStl5yg";
     private final String botUsername = "Card Games";
@@ -43,7 +45,8 @@ public class TelegramBot extends TelegramLongPollingBot {
             String currentUser = update.getMessage().getChat().getUserName();
 
             if (!playerNameToChatId.containsKey(currentUser)) playerNameToChatId.put(currentUser, chatId);
-            if (messageFromInput.startsWith("#")) {
+            String pinPrefix = "#";
+            if (messageFromInput.startsWith(pinPrefix)) {
                 tryFindLobbyWithGivenPin(messageFromInput, chatId, currentUser);
             } else {
                 if (!lobbies.isEmpty()) {
@@ -62,7 +65,7 @@ public class TelegramBot extends TelegramLongPollingBot {
     public void killLobby(String pin){
         for (Lobby lobby : lobbies){
             if (Objects.equals(lobby.m_pin, pin)){
-                sendOutputToAllUsers(lobby.m_playerNameToChatId.keySet(), standardCommands, "Lobby deleted");
+                sendOutputToAllUsers(lobby.m_playerNameToChatId.keySet(), standardCommands, LOBBY_DELETED.getMsg());
                 lobbies.remove(lobby);
             }
         }
@@ -77,31 +80,35 @@ public class TelegramBot extends TelegramLongPollingBot {
                 isSuccessful = true;
                 friendName = lobby.m_creator;
                 sendOutputToAllUsers(lobby.m_playerNameToChatId.keySet(), currentAvailableCommands,
-                        "@"+currentUser+" have entered the "+"@"+friendName+ " lobby!");
+                        AT.getMsg()+currentUser+HAVE_ENTERED.getMsg()+AT.getMsg()+friendName+ LOBBY.getMsg());
                 break;
             }
         }
         if (!isSuccessful)
             sendOutputToUser(currentUser,
                     currentAvailableCommands,
-                    "Try asking your friend the pin once again.\nYou typed: " + pin + "\nOr create your own lobby",
+                     TRY_ASK_AGAIN.getMsg() + pin + OR_CREATE_YOUR_OWN.getMsg(),
                     true );
+    }
+
+    public void sendSticker(String cardName, String ownerName){
+        //SendMessage.builder().
     }
 
     private void operateWithUserFirstly(String messageFromInput, String currentUser) {
         switch (messageFromInput) {
             case startCommand -> sendOutputToUser(currentUser,
                     standardCommands,
-                    "Here are your available commands", true);
+                    HERE_AVAILABLE_COMMANDS.getMsg(), true);
             case helpCommand -> sendOutputToUser(currentUser,
                     new String[]{createLobbyFoolCommand, createLobbyPharaohCommand, joinGameCommand},
-                    "Here are commands for playing", true);
+                    HERE_AVAILABLE_COMMANDS.getMsg(), true);
             case createLobbyFoolCommand -> createLobby(currentUser, Game.FOOL);
             case createLobbyPharaohCommand -> createLobby(currentUser, Game.PHARAOH);
             case joinGameCommand -> {
                 sendOutputToUser(currentUser,
                         new String[]{createLobbyFoolCommand, createLobbyPharaohCommand, joinGameCommand},
-                        "Please enter the pin from the game you want to enter\nOr create your own lobby", true);
+                        PLEASE_ENTER_PIN.getMsg()+OR_CREATE_YOUR_OWN.getMsg(), true);
             }
         }
     }

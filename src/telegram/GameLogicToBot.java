@@ -59,4 +59,7 @@ public class GameLogicToBot {
     public void killLobby(String pin){ m_telegramBot.killLobby(pin);}
     public String getCurrentPlayer(){ return m_currentPlayer;}
     public String[] getAvailableCommands(){return m_availableCommands;}
+    public void sendPhoto(String cardName, String ownerName){
+        m_telegramBot.sendSticker(cardName, ownerName);
+    }
 }
