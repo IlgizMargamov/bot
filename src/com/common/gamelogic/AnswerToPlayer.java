@@ -49,6 +49,7 @@ public enum AnswerToPlayer {
     YOU_TAKE_5_CARD("You take 5 card"),
     YOU_TAKE_2_CARD("You take 2 card"),
     SKIP_THE_TURN("You skip the turn"),
+    WHO_SENT_THIS_CARD(" sent this card"),
     ;
 
     private final String msg;

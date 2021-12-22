@@ -1,5 +1,7 @@
 package telegram;
 
+import org.telegram.telegrambots.meta.api.objects.InputFile;
+
 import java.util.Set;
 
 public class GameLogicToBot {
@@ -9,10 +11,18 @@ public class GameLogicToBot {
     private String m_currentPlayer;
     private String[] m_availableCommands;
 
+    /**
+     * Initialize class object
+     * @param telegramBot bot with which will operate
+     */
     public GameLogicToBot(TelegramBot telegramBot) {
         m_telegramBot = telegramBot;
     }
 
+    /**
+     * Communication with game logic
+     * @return what to send to game logic
+     */
     public String getInputToGameLogic() {
         while (m_inputToGameLogic == null){
             try {
@@ -52,14 +62,39 @@ public class GameLogicToBot {
         m_telegramBot.sendOutputToAllUsers(playersName, availableCommands, text);
     }
 
-    public void setInputMessage(char m_message) {
-        m_inputToGameLogic = String.valueOf(m_message);
+    /**
+     * Set message to be sent to game logic
+     * @param m_message message to set
+     */
+    public void setInputMessage(String m_message) {
+        m_inputToGameLogic = m_message;
     }
 
+    /**
+     * Kill specified lobby
+     * @param pin how to identify lobby to kill
+     */
     public void killLobby(String pin){ m_telegramBot.killLobby(pin);}
+
+    /**
+     * Get current player from game logic to not await messages from players which wait for their turn
+     * @return player to await
+     */
     public String getCurrentPlayer(){ return m_currentPlayer;}
+
+    /**
+     * Available to player commands
+     * @return available commands
+     */
     public String[] getAvailableCommands(){return m_availableCommands;}
-    public void sendPhoto(String cardName, String ownerName){
-        m_telegramBot.sendSticker(cardName, ownerName);
+
+    /**
+     * Send photo of a card to user
+     * @param players to whom send the photo
+     * @param file the card
+     * @param ownerName who throws the card
+     */
+    public void sendPhoto(Set<String> players, InputFile file, String ownerName){
+        m_telegramBot.sendPhoto(players, file, ownerName);
     }
 }
