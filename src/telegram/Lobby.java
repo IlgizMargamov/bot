@@ -9,6 +9,8 @@ import com.games.pharaoh.PharaohLogic;
 
 import java.util.*;
 
+import static com.common.gamelogic.AnswerToPlayer.*;
+
 public class Lobby implements Runnable {
     public String m_creator;
     public String m_pin;
@@ -37,6 +39,7 @@ public class Lobby implements Runnable {
     private final String cardsInDeckCommand = "/cards_in_deck";
     private final String leaveLobbyCommand = "/leave_lobby";
     private final String quitGameCommand = "/quit_game";
+    private final String startPrefix = "/start";
     private final String[] m_defaultCommands = {whatIsTrumpCommand, whatOnTheTableCommand, cardsInDeckCommand, quitGameCommand};
     private final String smallDeck = DeckType.SMALL.toString().toUpperCase();
     private final String mediumDeck = DeckType.MEDIUM.toString().toUpperCase();
@@ -53,7 +56,7 @@ public class Lobby implements Runnable {
         m_playerNameToChatId = new HashMap<>();
         m_playersMessages = new LinkedList<>();
         m_playerNameToChatId.put(creator, chatId);
-        sendOutputToUser(creator, availableCommands, "Invite your friends using your pin: " + m_pin, true);
+        sendOutputToUser(creator, availableCommands, INVITE_FRIENDS_USING_PIN.getMsg() + m_pin, true);
     }
 
     @Override
@@ -65,23 +68,23 @@ public class Lobby implements Runnable {
                     if (message.m_message.startsWith(createCommand)) {
                         sendOutputToUser(message.m_playerName,
                                 availableCommands,
-                                "You have entered the @" + m_creator + " lobby.\nUse these buttons to navigate",
+                                YOU_HAVE_ENTERED.getMsg() + m_creator + LOBBY.getMsg() + USE_BUTTONS.getMsg(),
                                 true);
                         continue; // to skip first message to lobby for each player
                     }
                     if (isEquals(message, leaveLobbyCommand)) {
-                        sendOutputToUser(message.m_playerName, availableCommands, "You leaved from " + m_creator + " lobby", true);
+                        sendOutputToUser(message.m_playerName, availableCommands, YOU_LEFT.getMsg() + m_creator + LOBBY.getMsg(), true);
                         m_playerNameToChatId.remove(message.m_playerName);
                     }
                     if (isEquals(message, pinCommand))
                         sendOutputToUser(message.m_playerName,
                                 availableCommands,
-                                "This lobby pin: " + m_pin,
+                                LOBBY_PIN.getMsg() + m_pin,
                                 true);
                     if (isEquals(message, showPlayersCommand))
                         sendOutputToUser(message.m_playerName,
                                 availableCommands,
-                                "Current players in lobby: " + getPlayersInLobby(),
+                                CURRENT_PLAYERS.getMsg() + getPlayersInLobby(),
                                 true);
                     if (isEquals(message, showGameInfoCommand))
                         sendOutputToUser(message.m_playerName, availableCommands, getGameInfo(), true);
@@ -89,14 +92,14 @@ public class Lobby implements Runnable {
                         sendOutputToUser(
                                 message.m_playerName,
                                 deckTypes,
-                                "Choose type of deck you want to play",
+                                CHOOSE_TYPE_OF_DECK.getMsg(),
                                 true);
                     }
                     for (String deckType : deckTypes) {
                         if (isEquals(message, deckType)) {
                             m_deckType = DeckType.getDeckType(deckType);
                             m_gameLogicToBot.sendOutputToAllUsers(m_playerNameToChatId.keySet(),
-                                    availableCommands, "Deck type has been set to: " + m_deckType + " by @" + message.m_playerName);
+                                    availableCommands, DECK_HAS_BEEN_SET.getMsg() + m_deckType + BY.getMsg() + message.m_playerName);
                             break;
                         }
                     }
@@ -114,15 +117,15 @@ public class Lobby implements Runnable {
                         m_gameThread = new Thread(m_gameLogic);
                         m_gameThread.start();
                         m_gameStarted = true;
-                        m_gameLogicToBot.sendOutputToAllUsers(m_playerNameToChatId.keySet(), m_availableCommandsInGame, "Game has started");
+                        m_gameLogicToBot.sendOutputToAllUsers(m_playerNameToChatId.keySet(), m_availableCommandsInGame, GAME_HAS_STARTED.getMsg());
                     }
                 } else { // in-game logic
-                    if (message.m_message.startsWith("/start")) continue;
+                    if (message.m_message.startsWith(startPrefix)) continue;
                     m_expectedPlayer = m_gameLogicToBot.getCurrentPlayer();
                     m_availableCommandsInGame = m_gameLogicToBot.getAvailableCommands();
                     if (isEquals(message, quitGameCommand)) {
-                        m_gameStarted=false;
-                        sendOutputToUser(message.m_playerName, availableCommands, "You left "+m_creator+ "lobby", true);
+                        m_gameStarted = false;
+                        sendOutputToUser(message.m_playerName, availableCommands, YOU_LEFT.getMsg() + m_creator + LOBBY.getMsg(), true);
                         m_gameLogicToBot.killLobby(m_pin);
                         return;
                     }
@@ -139,12 +142,12 @@ public class Lobby implements Runnable {
                         if (!correctCommand)
                             sendOutputToUser(message.m_playerName,
                                     m_defaultCommands,
-                                    "Wrong command.\nTry again,please",
+                                    WRONG_COMMAND.getMsg() + TRY_AGAIN.getMsg(),
                                     true);
                     } else {
                         sendOutputToUser(message.m_playerName,
                                 m_defaultCommands,
-                                "Not your turn yet.\nPlease, wait",
+                                NOT_YOUR_TURN.getMsg() + TRY_AGAIN.getMsg(),
                                 true);
                     }
                 }
@@ -180,22 +183,22 @@ public class Lobby implements Runnable {
     }
 
     private String getGameInfo() {
-        String result = String.format("Lobby creator: %s\n" +
-                "Pin for lobby %s\n" +
-                "Players: " + getPlayersInLobby() +
-                "Game to play: %s\n" +
-                "Deck type: %s", m_creator, m_pin, m_game, m_deckType);
+        String result = String.format(LOBBY_CREATOR.getMsg() + "%s\n" +
+                LOBBY_PIN.getMsg() + "%s\n" +
+                PLAYERS.getMsg() + getPlayersInLobby() +
+                GAME.getMsg() + "%s\n" +
+                DECK_TYPE.getMsg()+ "%s", m_creator, m_pin, m_game, m_deckType);
 
         return result;
     }
 
     private String getPlayersInLobby() {
-        String players = "{\n";
+        StringBuilder players = new StringBuilder(OPEN_BRACE_LINE.getMsg());
         for (String playerName : m_playerNameToChatId.keySet()) {
-            players += "@" + playerName + "\n";
+            players.append(AT.getMsg()).append(playerName).append(LINE.getMsg());
         }
-        players += "}\n";
+        players.append(CLOSE_BRACE_LINE.getMsg());
 
-        return players;
+        return players.toString();
     }
 }
