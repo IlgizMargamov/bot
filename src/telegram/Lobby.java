@@ -118,7 +118,7 @@ public class Lobby implements Runnable {
                         }
                         m_gameThread = new Thread(m_gameLogic);
                         m_gameStarted = true;
-                        m_gameLogicToBot.sendOutputToAllUsers(m_playerNameToChatId.keySet(), m_availableCommandsInGame, "Game has started");
+                        m_gameLogicToBot.sendOutputToAllUsers(m_playerNameToChatId.keySet(), m_availableCommandsInGame, GAME_HAS_STARTED.getMsg());
                         try {
                             Thread.sleep(50);
                         } catch (InterruptedException e) {
@@ -191,13 +191,12 @@ public class Lobby implements Runnable {
     }
 
     private String getGameInfo() {
-        String result = String.format(LOBBY_CREATOR.getMsg() + "%s\n" +
+
+        return String.format(LOBBY_CREATOR.getMsg() + "%s\n" +
                 LOBBY_PIN.getMsg() + "%s\n" +
                 PLAYERS.getMsg() + getPlayersInLobby() +
                 GAME.getMsg() + "%s\n" +
                 DECK_TYPE.getMsg()+ "%s", m_creator, m_pin, m_game, m_deckType);
-
-        return result;
     }
 
     private String getPlayersInLobby() {
