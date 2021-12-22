@@ -114,7 +114,6 @@ public class Lobby implements Runnable {
                             default -> throw new IllegalStateException();
                         }
                         m_gameThread = new Thread(m_gameLogic);
-                        m_gameThread.start();
                         m_gameStarted = true;
                         m_gameLogicToBot.sendOutputToAllUsers(m_playerNameToChatId.keySet(), m_availableCommandsInGame, "Game has started");
                         try {
@@ -189,22 +188,20 @@ public class Lobby implements Runnable {
     }
 
     private String getGameInfo() {
-        String result = String.format("Lobby creator: %s\n" +
+        return String.format("Lobby creator: %s\n" +
                 "Pin for lobby %s\n" +
                 "Players: " + getPlayersInLobby() +
                 "Game to play: %s\n" +
                 "Deck type: %s", m_creator, m_pin, m_game, m_deckType);
-
-        return result;
     }
 
     private String getPlayersInLobby() {
-        String players = "{\n";
+        StringBuilder players = new StringBuilder("{\n");
         for (String playerName : m_playerNameToChatId.keySet()) {
-            players += "@" + playerName + "\n";
+            players.append("@").append(playerName).append("\n");
         }
-        players += "}\n";
+        players.append("}\n");
 
-        return players;
+        return players.toString();
     }
 }
