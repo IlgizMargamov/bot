@@ -214,11 +214,10 @@ public class TelegramBot extends TelegramLongPollingBot {
      * @return SendMessage object
      */
     private SendMessage getSendMessage(String message, String chatId) {
-        SendMessage sendMessage = SendMessage
+        return SendMessage
                 .builder()
                 .chatId(String.valueOf(chatId))
                 .text(message)
                 .build();
-        return sendMessage;
     }
 }

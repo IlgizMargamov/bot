@@ -46,6 +46,9 @@ public enum AnswerToPlayer {
     OR_CREATE_YOUR_OWN("\nOr create your own lobby"),
     HERE_AVAILABLE_COMMANDS("Here are your available commands"),
     PLEASE_ENTER_PIN("Please enter the pin from the game you want to enter"),
+    YOU_TAKE_5_CARD("You take 5 card"),
+    YOU_TAKE_2_CARD("You take 2 card"),
+    SKIP_THE_TURN("You skip the turn"),
     ;
 
     private final String msg;

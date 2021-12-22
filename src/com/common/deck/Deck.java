@@ -22,6 +22,8 @@ public class Deck {
         shuffle(Cards);
     }
 
+    public int getSize(){ return Cards.size();}
+
     /**
      * Копирование колоды
      *

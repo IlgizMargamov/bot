@@ -74,4 +74,6 @@ public class BasePlayer implements Player {
     public CardImpl giveLastCard(){
         return hand.remove(hand.size()-1);
     }
+
+    public CardImpl getLastCard(){return hand.get(hand.size()-1);}
 }

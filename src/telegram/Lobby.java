@@ -11,6 +11,8 @@ import java.util.*;
 
 import static com.common.gamelogic.AnswerToPlayer.*;
 
+
+//TODO: Парсить команды до точки.
 public class Lobby implements Runnable {
     public String m_creator;
     public String m_pin;
@@ -115,9 +117,15 @@ public class Lobby implements Runnable {
                             default -> throw new IllegalStateException();
                         }
                         m_gameThread = new Thread(m_gameLogic);
-                        m_gameThread.start();
                         m_gameStarted = true;
-                        m_gameLogicToBot.sendOutputToAllUsers(m_playerNameToChatId.keySet(), m_availableCommandsInGame, GAME_HAS_STARTED.getMsg());
+                        m_gameLogicToBot.sendOutputToAllUsers(m_playerNameToChatId.keySet(), m_availableCommandsInGame, "Game has started");
+                        try {
+                            Thread.sleep(50);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        m_gameThread.start();
+
                     }
                 } else { // in-game logic
                     if (message.m_message.startsWith(startPrefix)) continue;
