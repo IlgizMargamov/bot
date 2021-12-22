@@ -174,7 +174,11 @@ public class TelegramBot extends TelegramLongPollingBot {
      */
     public void sendPhoto(Set<String> players, InputFile file, String ownerName) {
         for (String playerName : players) {
-            SendPhoto.builder().chatId(playerNameToChatId.get(playerName)).photo(file).caption(ownerName + WHO_SENT_THIS_CARD.getMsg()).build();
+            try {
+                execute(SendPhoto.builder().chatId(playerNameToChatId.get(playerName)).photo(file).caption(ownerName + WHO_SENT_THIS_CARD.getMsg()).build());
+            } catch (TelegramApiException e) {
+                e.printStackTrace();
+            }
         }
     }
 
