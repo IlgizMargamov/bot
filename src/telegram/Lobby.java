@@ -7,13 +7,15 @@ import com.common.player.BasePlayer;
 import com.games.fool.FoolLogic;
 import com.games.pharaoh.PharaohLogic;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static com.common.gamelogic.AnswerToPlayer.*;
 
 
-//TODO: Парсить команды до точки.
 public class Lobby implements Runnable {
     public String m_creator;
     public String m_pin;
@@ -24,15 +26,17 @@ public class Lobby implements Runnable {
     public ConcurrentLinkedQueue<Message> m_playersMessages;
 
     private BaseGameLogic m_gameLogic;
-    private DeckType m_deckType = DeckType.MEDIUM;
     private boolean m_gameStarted;
     private String m_expectedPlayer;
     private String[] m_availableCommandsInGame;
     private Thread m_gameThread;
+    private boolean m_isVisible =true;
+    private DeckType m_deckType = DeckType.MEDIUM;
 
     private final String createCommand = "/create";
     private final String pinCommand = "/pin";
     private final String helpCommand = "/help";
+    private final String closeLobbyCommand = "/close_lobby";
     private final String showPlayersCommand = "/show_players";
     private final String showGameInfoCommand = "/show_game";
     private final String startGameCommand = "/start_game";
@@ -48,7 +52,7 @@ public class Lobby implements Runnable {
     private final String mediumDeck = DeckType.MEDIUM.toString().toUpperCase();
     private final String bigDeck = DeckType.BIG.toString().toUpperCase();
     private final String[] deckTypes = {smallDeck, mediumDeck, bigDeck};
-    private String[] availableCommands = {helpCommand, pinCommand, showPlayersCommand, showGameInfoCommand, establishDeckType, startGameCommand, leaveLobbyCommand};
+    private final String[] availableCommands = {helpCommand, pinCommand, showPlayersCommand, showGameInfoCommand, establishDeckType, startGameCommand, closeLobbyCommand, leaveLobbyCommand};
 
     public Lobby(String creator, String chatId, String pin, List<BasePlayer> playersList, GameLogicToBot gameLogicToBot, Game wishedGame) {
         m_creator = creator;
@@ -69,12 +73,14 @@ public class Lobby implements Runnable {
                 Message message = m_playersMessages.poll();
                 if (!m_gameStarted) {
                     if (ifLobbyJustCreated(message)) continue; // to skip first message to lobby for each player
+                    ifPlayerChangesVisibility(message);
                     ifPlayerLeavesLobby(message);
                     ifPlayerAsksPin(message);
                     ifPlayerAsksToSeePlayersInLobby(message);
                     ifPlayerAsksGameInfo(message);
+                    ifPlayerAsksHelp(message);
                     ifPlayerInitsChoosingDeckType(message);
-                    chooseDeckType(message);
+                    ifPlayerChoosesDeckType(message);
                     ifGameStarts(message);
 
                 } else { // in-game logic
@@ -100,6 +106,25 @@ public class Lobby implements Runnable {
             }
         }
     }
+
+    private void ifPlayerAsksHelp(Message message) {
+        if (isEquals(message, helpCommand)){
+            switch (m_game){
+                case FOOL -> sendOutputToUser(message.m_playerName, availableCommands, HOW_TO_PLAY_FOOL.getMsg(), true);
+                case PHARAOH -> sendOutputToUser(message.m_playerName, availableCommands, HOW_TO_PLAY_PHARAOH.getMsg(), true);
+            }
+        }
+    }
+
+    private void ifPlayerChangesVisibility(Message message) {
+        if (isEquals(message, closeLobbyCommand)){
+            setLobbyVisibility(false);
+            m_gameLogicToBot.sendOutputToAllUsers(m_playerNameToChatId.keySet(),
+                    availableCommands, AT.getMsg()+ message.m_playerName + HAVE_CLOSED_LOBBY.getMsg());
+        }
+    }
+
+    public boolean getLobbyVisibility(){ return m_isVisible; }
 
     private void establishCommandCorrectness(Message message) {
         boolean correctCommand = isCorrectCommand(message);
@@ -188,7 +213,7 @@ public class Lobby implements Runnable {
         }
     }
 
-    private void chooseDeckType(Message message) {
+    private void ifPlayerChoosesDeckType(Message message) {
         for (String deckType : deckTypes) {
             if (isEquals(message, deckType)) {
                 m_deckType = DeckType.getDeckType(deckType);
@@ -224,9 +249,9 @@ public class Lobby implements Runnable {
     }
 
     private void sendInputToGameLogic(String m_message) {
-        StringBuilder result= new StringBuilder();
-        for (int i=0;i< m_message.length();i++){
-            if (m_message.charAt(i)=='.') break;
+        StringBuilder result = new StringBuilder();
+        for (int i = 0; i < m_message.length(); i++) {
+            if (m_message.charAt(i) == '.') break;
             result.append(m_message.charAt(i));
         }
         m_gameLogicToBot.setInputMessage(result.toString());
@@ -249,6 +274,8 @@ public class Lobby implements Runnable {
     private boolean isEquals(Message message, String command) {
         return message.m_message.equals(command);
     }
+
+    private void setLobbyVisibility(boolean isVisible){ m_isVisible =isVisible;}
 
     private String getGameInfo() {
         return String.format(LOBBY_CREATOR.getMsg() + "%s\n" +

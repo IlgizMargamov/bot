@@ -17,8 +17,8 @@ public class TelegramBot extends TelegramLongPollingBot {
     private final String token = "5008512617:AAGrCuVOt6wfZPqQJzxtBp93sTSEYStl5yg";
     private final String botUsername = "Card Games";
 
-    private Map<String, String> playerNameToChatId = new HashMap<>(); //
-    private List<Lobby> lobbies = new ArrayList<>();
+    private final Map<String, String> playerNameToChatId = new HashMap<>(); //
+    private final List<Lobby> lobbies = new ArrayList<>();
 
     private String[] currentAvailableCommands; // for checking if player answered expectedly
     private final String startCommand = "/start";
@@ -27,7 +27,8 @@ public class TelegramBot extends TelegramLongPollingBot {
     private final String createLobbyFoolCommand = "/create_lobby_fool";
     private final String startGame = "/start_game";
     private final String joinGameCommand = "/join_game";
-    private final String[] standardCommands = {startCommand, helpCommand, createLobbyFoolCommand, createLobbyPharaohCommand, joinGameCommand};
+    private final String showLobbiesCommand = "/show_lobbies";
+    private final String[] standardCommands = {startCommand, helpCommand, createLobbyFoolCommand, createLobbyPharaohCommand, joinGameCommand, showLobbiesCommand};
 
     @Override
     public String getBotUsername() {
@@ -76,7 +77,7 @@ public class TelegramBot extends TelegramLongPollingBot {
 
     private void tryFindLobbyWithGivenPin(String pin, String chatId, String currentUser) {
         boolean isSuccessful = false;
-        String friendName = "";
+        String friendName;
         for (Lobby lobby : lobbies) {
             if (lobby.m_pin.equals(pin)) {
                 lobby.m_playerNameToChatId.put(currentUser, chatId);
@@ -104,10 +105,15 @@ public class TelegramBot extends TelegramLongPollingBot {
                     HERE_AVAILABLE_COMMANDS.getMsg(), true);
             case createLobbyFoolCommand -> createLobby(currentUser, Game.FOOL);
             case createLobbyPharaohCommand -> createLobby(currentUser, Game.PHARAOH);
-            case joinGameCommand -> {
-                sendOutputToUser(currentUser,
-                        new String[]{createLobbyFoolCommand, createLobbyPharaohCommand, joinGameCommand},
-                        PLEASE_ENTER_PIN.getMsg() + OR_CREATE_YOUR_OWN.getMsg(), true);
+            case joinGameCommand -> sendOutputToUser(currentUser,
+                    new String[]{createLobbyFoolCommand, createLobbyPharaohCommand, joinGameCommand},
+                    PLEASE_ENTER_PIN.getMsg() + OR_CREATE_YOUR_OWN.getMsg(), true);
+            case showLobbiesCommand -> {
+                List<String> pins=new ArrayList<>();
+                for (Lobby lobby : lobbies){
+                    if (lobby.getLobbyVisibility()){pins.add(lobby.m_pin);}
+                }
+                sendOutputToUser(currentUser, pins.toArray(new String[0]), CHOOSE_LOBBY_PIN.getMsg(), true);
             }
         }
     }
@@ -158,7 +164,7 @@ public class TelegramBot extends TelegramLongPollingBot {
      * @param availableCommands available commands
      * @param text              text to show
      */
-    public void sendOutputToAllUsers(Set<String> players, String[] availableCommands, String text) {
+    public void sendOutputToAllUsers(Set<String> players, String[] availableCommands, String text) { // playersName(?) or receiving player
         for (String playerName : players) {
             sendOutputToUser(playerName, availableCommands, text, true);
         }
@@ -172,10 +178,18 @@ public class TelegramBot extends TelegramLongPollingBot {
      * @param file      card photo to send
      * @param ownerName who sent
      */
-    public void sendPhoto(Set<String> players, InputFile file, String ownerName) {
-        for (String playerName : players) {
+    public void sendPhoto(Set<String> players, InputFile file, String ownerName) { // objects are better(?)
+        for (String playerName : players) { // inputFileStream в чем-то ещё обернуть (STREAM)
+            SendPhoto sendPhoto;
+            sendPhoto = SendPhoto
+                    .builder()
+                    .chatId(playerNameToChatId.get(playerName))
+                    .photo(file)
+                    .caption(ownerName + WHO_SENT_THIS_CARD.getMsg())
+                    .build();
+
             try {
-                execute(SendPhoto.builder().chatId(playerNameToChatId.get(playerName)).photo(file).caption(ownerName + WHO_SENT_THIS_CARD.getMsg()).build());
+                execute(sendPhoto);
             } catch (TelegramApiException e) {
                 e.printStackTrace();
             }
