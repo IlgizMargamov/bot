@@ -6,5 +6,4 @@ public interface GameLogic {
     /**
      * Начать игру*/
     void startGame();
-
 }

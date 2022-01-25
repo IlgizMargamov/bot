@@ -3,6 +3,8 @@ package com.games.fool;
 import com.common.card.CardImpl;
 import com.common.gamelogic.AnswerToPlayer;
 
+import java.util.Objects;
+
 /**
  * Сущность, определяющая корректность покрытия карты
  */
@@ -47,5 +49,18 @@ public class TupleOfCard {
     public String toString() {
         if (secondCard == null) return firstCard.cardSuitAndRank() + " \\ " + AnswerToPlayer.NOTHING.getMsg();
         return firstCard.cardSuitAndRank() + " \\ " + secondCard.cardSuitAndRank();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        TupleOfCard tuple = (TupleOfCard) o;
+        return firstCard.equals(tuple.firstCard) && Objects.equals(secondCard, tuple.secondCard);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(firstCard, secondCard);
     }
 }

@@ -1,5 +1,7 @@
 package com.common.card;
 
+import java.util.Objects;
+
 /**
  * Реализация карты
  */
@@ -53,5 +55,18 @@ public class CardImpl implements Card {
                 "CardSuit=" + CardSuit +
                 ", CardRank=" + CardRank +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        CardImpl card = (CardImpl) o;
+        return CardSuit == card.CardSuit && CardRank == card.CardRank;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(CardSuit, CardRank);
     }
 }
