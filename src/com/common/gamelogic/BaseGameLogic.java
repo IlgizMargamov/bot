@@ -1,5 +1,6 @@
 package com.common.gamelogic;
 
+import Images.ImageWorker;
 import com.Main;
 import com.common.card.CardImpl;
 import com.common.deck.Deck;
@@ -15,14 +16,16 @@ public abstract class BaseGameLogic implements GameLogic, Runnable {
 
     protected Deck deck;
     protected final BasePlayer[] players;
-    protected int currentPlayer;
+    protected int attackPlayer1;
     protected Scanner scanner = new Scanner(System.in);
     protected GameLogicToBot gameLogicToBot;
+    protected ImageWorker worker;
 
     public BaseGameLogic(BasePlayer[] players, Deck deck) {
         this.deck = deck;
         this.players = players;
-        currentPlayer = 0;
+        this.worker = Main.worker;
+        attackPlayer1 = 0;
     }
 
     /**
@@ -55,8 +58,8 @@ public abstract class BaseGameLogic implements GameLogic, Runnable {
      * @param count насколько сдвинуть
      */
     protected void movePlayerOn(int count) {
-        currentPlayer += count;
-        currentPlayer %= players.length;
+        attackPlayer1 += count;
+        attackPlayer1 %= players.length;
     }
 
     /**
@@ -128,4 +131,15 @@ public abstract class BaseGameLogic implements GameLogic, Runnable {
             default -> throw new RuntimeException();
         }
     }
+
+//    protected void sendPhoto(File photo, String playerName){
+//        if(Main.type != TypeOfCommunication.IN_TELEGRAM) return;
+//        Set<String> players = new HashSet<>();
+//        for (BasePlayer player:this.players) {
+//            players.add(player.name);
+//        }
+//        File f1 = new File("");
+//        InputFile f = new InputFile(photo,"table");
+//        gameLogicToBot.sendPhoto(players,f,playerName);
+//    }
 }

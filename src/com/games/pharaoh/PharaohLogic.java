@@ -51,8 +51,8 @@ public class PharaohLogic extends BaseGameLogic {
             startSet();
             countPlayersScore();
             if (lastCard.CardRank == Rank.HIDDEN) {
-                score.replace(players[(currentPlayer - 1) % players.length],
-                        score.get(players[(currentPlayer - 1) % players.length]) - 20);
+                score.replace(players[(attackPlayer1 - 1) % players.length],
+                        score.get(players[(attackPlayer1 - 1) % players.length]) - 20);
             }
             for (BasePlayer player : score.keySet()) {
                 sendToUser(new String[]{player.name + " : " + score.get(player)}, player.name, false);
@@ -63,62 +63,95 @@ public class PharaohLogic extends BaseGameLogic {
     @Override
     protected boolean startSet() {
         giveCardToPlayers(4);
-        table.add(players[currentPlayer].giveLastCard());
+        table.add(players[attackPlayer1].giveLastCard());
         lastCard = table.get(table.size() - 1);
         movePlayerOn(1);
         do {
-            boolean madeTurn = makeTurn();
-            if (lastCard.CardRank != Rank.SIX && lastCard.CardRank != Rank.LADY)
-                sendToUser(new String[]{AnswerToPlayer.END_OF_TURN.getMsg()}, players[currentPlayer].name, false);
-            if (madeTurn) {
-                if (lastCard.CardRank == Rank.LADY) {
-                    sendToUser(new String[]{AnswerToPlayer.CHOOSE_SUIT.getMsg()},players[currentPlayer].name,false);
-                    sendToUser(new String[]{Suit.CLUBS.getSuit(),
-                            Suit.DIAMOND.getSuit(),
-                            Suit.HEARTS.getSuit(),
-                            Suit.SPADES.getSuit()}, players[currentPlayer].name, true);
-                    Suit pickedSuit;
-                    do {
-                        pickedSuit = Suit.valuesOf(Integer.parseInt(getFromUser()));
-                    } while (pickedSuit == Suit.HIDDEN);
-                    lastCard = new CardImpl(pickedSuit, Rank.HIDDEN);
-                    movePlayerOn(1);
-                    sendToUser(new String[]{AnswerToPlayer.END_OF_TURN.getMsg()}, players[currentPlayer].name, false);
-                    continue;
-                } else if (lastCard.CardRank == Rank.ACE) {
-                    sendToUser(new String[]{AnswerToPlayer.SKIP_THE_TURN.getMsg()}, players[(currentPlayer + 1) % players.length].name, false);
-                    movePlayerOn(2);
-                    continue;
-                } else if (lastCard.CardRank == Rank.SEVEN) {
-                    sendToUser(new String[]{AnswerToPlayer.YOU_TAKE_2_CARD.getMsg()}, players[(currentPlayer + 1) % players.length].name, false);
-                    nextPlayerTakeCardCount(2);
-                    movePlayerOn(2);
-                    continue;
-                } else if (lastCard.CardRank == Rank.KING && lastCard.CardSuit == Suit.CLUBS) {
-                    sendToUser(new String[]{AnswerToPlayer.YOU_TAKE_5_CARD.getMsg()}, players[(currentPlayer + 1) % players.length].name, false);
-                    nextPlayerTakeCardCount(5);
-                    movePlayerOn(2);
-                    continue;
-                } else if (lastCard.CardRank == Rank.SIX) {
-                    continue;
-                }
-
+            if (players[attackPlayer1].getClass() == PharaohAI.class) {
+                if (AITurn()) continue;
+            } else {
+                if (playerTurn()) continue;
             }
             movePlayerOn(1);
         } while (!checkSetCondition());
         return false;
     }
 
+    private boolean playerTurn() {
+        boolean madeTurn = makeTurn();
+        if (lastCard.CardRank != Rank.SIX && lastCard.CardRank != Rank.LADY)
+            sendToUser(new String[]{AnswerToPlayer.END_OF_TURN.getMsg()}, players[attackPlayer1].name, false);
+        if (madeTurn) {
+            if (lastCard.CardRank == Rank.LADY) {
+                sendToUser(new String[]{AnswerToPlayer.CHOOSE_SUIT.getMsg()}, players[attackPlayer1].name, false);
+                sendToUser(new String[]{Suit.CLUBS.getSuit(),
+                        Suit.DIAMOND.getSuit(),
+                        Suit.HEARTS.getSuit(),
+                        Suit.SPADES.getSuit()}, players[attackPlayer1].name, true);
+                Suit pickedSuit;
+                do {
+                    pickedSuit = Suit.valuesOf(Integer.parseInt(getFromUser()));
+                } while (pickedSuit == Suit.HIDDEN);
+                lastCard = new CardImpl(pickedSuit, Rank.HIDDEN);
+                movePlayerOn(1);
+                sendToUser(new String[]{AnswerToPlayer.END_OF_TURN.getMsg()}, players[attackPlayer1].name, false);
+                return true;
+            } else if (lastCard.CardRank == Rank.ACE) {
+                sendToUser(new String[]{AnswerToPlayer.SKIP_THE_TURN.getMsg()}, players[(attackPlayer1 + 1) % players.length].name, false);
+                movePlayerOn(2);
+                return true;
+            } else if (lastCard.CardRank == Rank.SEVEN) {
+                sendToUser(new String[]{AnswerToPlayer.YOU_TAKE_2_CARD.getMsg()}, players[(attackPlayer1 + 1) % players.length].name, false);
+                nextPlayerTakeCardCount(2);
+                movePlayerOn(2);
+                return true;
+            } else if (lastCard.CardRank == Rank.KING && lastCard.CardSuit == Suit.CLUBS) {
+                sendToUser(new String[]{AnswerToPlayer.YOU_TAKE_5_CARD.getMsg()}, players[(attackPlayer1 + 1) % players.length].name, false);
+                nextPlayerTakeCardCount(5);
+                movePlayerOn(2);
+                return true;
+            } else return lastCard.CardRank == Rank.SIX;
+        }
+        return false;
+    }
+
+    protected boolean AITurn() {
+        PharaohAI player = (PharaohAI) players[attackPlayer1];
+        CardImpl card = player.Turn(lastCard);
+        if (card == null) {
+            player.takeCard(deck.giveNext());
+            return true;
+        }
+        table.add(card);
+        lastCard = card;
+        if (lastCard.CardRank == Rank.LADY) {
+            lastCard = new CardImpl(player.pickSuit(), Rank.HIDDEN);
+            movePlayerOn(1);
+        } else if (lastCard.CardRank == Rank.ACE) {
+            movePlayerOn(2);
+            return true;
+        } else if (lastCard.CardRank == Rank.SEVEN) {
+            nextPlayerTakeCardCount(2);
+            movePlayerOn(2);
+            return true;
+        } else if (lastCard.CardRank == Rank.KING && lastCard.CardSuit == Suit.CLUBS) {
+            nextPlayerTakeCardCount(5);
+            movePlayerOn(2);
+            return true;
+        } else return lastCard.CardRank == Rank.SIX;
+        return false;
+    }
+
 
     private void nextPlayerTakeCardCount(int count) {
         for (int i = 0; i < count; i++) {
-            players[(currentPlayer + 1) % players.length].takeCard(deck.giveNext());
+            players[(attackPlayer1 + 1) % players.length].takeCard(deck.giveNext());
             if (deck.isEmpty()) deck = new Deck(table);
         }
     }
 
     protected boolean makeTurn() {
-        String playerName = players[currentPlayer].name;
+        String playerName = players[attackPlayer1].name;
         sendToUser(new String[]{AnswerToPlayer.PLAYER.getMsg() + playerName + AnswerToPlayer.MAKE_TURN.getMsg()}, playerName, false);
         boolean take = true;
         while (true) {
@@ -126,7 +159,7 @@ public class PharaohLogic extends BaseGameLogic {
             else sendToUser(withPass, playerName, true);
             TypeOfCommand command = TypeOfCommand.pickTurn(Integer.parseInt(getFromUser()));
             switch (command) {
-                case CHECK_HAND -> sendToUser(players[currentPlayer].showHand().toArray(new String[0]), playerName, false);
+                case CHECK_HAND -> sendToUser(players[attackPlayer1].showHand().toArray(new String[0]), playerName, false);
                 case CHECK_TABLE -> {
                     Rank rank = lastCard.CardRank;
                     if (rank == Rank.HIDDEN) sendToUser(new String[]{lastCard.CardSuit.getSuit()}, playerName, false);
@@ -138,8 +171,8 @@ public class PharaohLogic extends BaseGameLogic {
                 }
                 case TAKE -> {
                     if (take) {
-                        players[currentPlayer].takeCard(deck.giveNext());
-                        sendToUser(new String[]{players[currentPlayer].getLastCard().cardSuitAndRank()},playerName,false);
+                        players[attackPlayer1].takeCard(deck.giveNext());
+                        sendToUser(new String[]{players[attackPlayer1].getLastCard().cardSuitAndRank()}, playerName, false);
                         take = false;
                     }
                 }
@@ -153,25 +186,25 @@ public class PharaohLogic extends BaseGameLogic {
     }
 
     private boolean throwCard() {
-        sendToUser(new String[]{AnswerToPlayer.WHAT_THROW.getMsg()}, players[currentPlayer].name, false);
-        ArrayList<String> message = new ArrayList<>(players[currentPlayer].showHand());
+        sendToUser(new String[]{AnswerToPlayer.WHAT_THROW.getMsg()}, players[attackPlayer1].name, false);
+        ArrayList<String> message = new ArrayList<>(players[attackPlayer1].showHand());
         message.add(BACK.getType());
-        sendToUser(message.toArray(new String[0]), players[currentPlayer].name, true);
+        sendToUser(message.toArray(new String[0]), players[attackPlayer1].name, true);
         CardImpl playerCard;
         int numberOfCardOnHand;
         while (true) {
             numberOfCardOnHand = Integer.parseInt(getFromUser()) - 1;
             if (numberOfCardOnHand == -1) return false;
-            playerCard = players[currentPlayer].hand.get(numberOfCardOnHand);
+            playerCard = players[attackPlayer1].hand.get(numberOfCardOnHand);
             if (checkMoveCorrectness(playerCard)) {
-                sendToUser(new String[]{AnswerToPlayer.TRY_ANOTHER_CARD.getMsg()}, players[currentPlayer].name, false);
+                sendToUser(new String[]{AnswerToPlayer.TRY_ANOTHER_CARD.getMsg()}, players[attackPlayer1].name, false);
                 continue;
             }
             break;
         }
         table.add(playerCard);
         lastCard = playerCard;
-        players[currentPlayer].removeCard(numberOfCardOnHand);
+        players[attackPlayer1].removeCard(numberOfCardOnHand);
         return true;
     }
 
@@ -204,7 +237,7 @@ public class PharaohLogic extends BaseGameLogic {
     }
 
     private boolean checkSetCondition() {
-        return players[currentPlayer].hand.size() == 0;
+        return players[attackPlayer1].hand.size() == 0;
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com;
 
+import Images.ImageWorker;
 import com.common.deck.Deck;
 import com.common.deck.DeckType;
 import com.common.gamelogic.BaseGameLogic;
@@ -17,10 +18,13 @@ import static com.common.deck.DeckType.getDeckType;
 public class Main {
 
     public static TypeOfCommunication type;
+    public static ImageWorker worker;
     private static final String chooseHost = "Where you want to start?\n 1. Console.\n 2. Telegram.";
+
 
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
+        worker = new ImageWorker();
         System.out.println(chooseHost);
         type = TypeOfCommunication.getType(Integer.parseInt(scanner.nextLine()));
         switch (type) {
