@@ -9,6 +9,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class FoolAI extends BasePlayer {
+    public FoolAI(String name) {
+        super(name);
+    }
+
     /**
      * Метод вызываемой при атаке бота
      *

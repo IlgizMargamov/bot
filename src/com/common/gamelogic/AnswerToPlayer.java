@@ -52,6 +52,7 @@ public enum AnswerToPlayer {
     WHO_SENT_THIS_CARD(" sent this card"),
     HAVE_CLOSED_LOBBY(" have closed the lobby"),
     CHOOSE_LOBBY_PIN("Choose lobby pin"),
+    BOT_ADDED("Bot has been added"),
     HOW_TO_PLAY_FOOL("""
 Правила игры "Дурак"
 Первым ходит игрок с самым младшим козырем.

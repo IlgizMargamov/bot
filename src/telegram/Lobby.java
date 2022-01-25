@@ -4,7 +4,9 @@ import com.common.deck.Deck;
 import com.common.deck.DeckType;
 import com.common.gamelogic.BaseGameLogic;
 import com.common.player.BasePlayer;
+import com.games.fool.FoolAI;
 import com.games.fool.FoolLogic;
+import com.games.pharaoh.PharaohAI;
 import com.games.pharaoh.PharaohLogic;
 
 import java.util.HashMap;
@@ -46,13 +48,15 @@ public class Lobby implements Runnable {
     private final String cardsInDeckCommand = "/cards_in_deck";
     private final String leaveLobbyCommand = "/leave_lobby";
     private final String quitGameCommand = "/quit_game";
+    private final String playWithBotCommand = "/play_with_bot";
     private final String startPrefix = "/start";
+    private final String bot = "bot";
     private final String[] m_defaultCommands = {whatIsTrumpCommand, whatOnTheTableCommand, cardsInDeckCommand, quitGameCommand};
     private final String smallDeck = DeckType.SMALL.toString().toUpperCase();
     private final String mediumDeck = DeckType.MEDIUM.toString().toUpperCase();
     private final String bigDeck = DeckType.BIG.toString().toUpperCase();
     private final String[] deckTypes = {smallDeck, mediumDeck, bigDeck};
-    private final String[] availableCommands = {helpCommand, pinCommand, showPlayersCommand, showGameInfoCommand, establishDeckType, startGameCommand, closeLobbyCommand, leaveLobbyCommand};
+    private final String[] availableCommands = {helpCommand, pinCommand, showPlayersCommand, showGameInfoCommand, establishDeckType, playWithBotCommand, startGameCommand, closeLobbyCommand, leaveLobbyCommand};
 
     public Lobby(String creator, String chatId, String pin, List<BasePlayer> playersList, GameLogicToBot gameLogicToBot, Game wishedGame) {
         m_creator = creator;
@@ -73,6 +77,7 @@ public class Lobby implements Runnable {
                 Message message = m_playersMessages.poll();
                 if (!m_gameStarted) {
                     if (ifLobbyJustCreated(message)) continue; // to skip first message to lobby for each player
+                    ifPlayerAsksToPlayWithBot(message);
                     ifPlayerChangesVisibility(message);
                     ifPlayerLeavesLobby(message);
                     ifPlayerAsksPin(message);
@@ -104,6 +109,17 @@ public class Lobby implements Runnable {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    private void ifPlayerAsksToPlayWithBot(Message message) {
+        if (isEquals(message, playWithBotCommand)){
+            switch (m_game){
+                case FOOL -> m_playerList.add(new FoolAI(bot));
+                case PHARAOH -> m_playerList.add(new PharaohAI(bot));
+            }
+
+            sendOutputToUser(m_creator, availableCommands, BOT_ADDED.getMsg(), true);
         }
     }
 

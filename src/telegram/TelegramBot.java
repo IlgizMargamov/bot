@@ -9,9 +9,6 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMar
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.util.*;
 
 import static com.common.gamelogic.AnswerToPlayer.*;
@@ -143,6 +140,8 @@ public class TelegramBot extends TelegramLongPollingBot {
     public void sendOutputToUser(String playerName, String[] availableCommands, String text, boolean commandsInRows) {
         currentAvailableCommands = availableCommands; // to know possible answers
         String chatId = playerNameToChatId.get(playerName); // find player's chatId by playerName
+        if (chatId==null) return;
+
         SendMessage message = SendMessage
                 .builder()
                 .text(text)

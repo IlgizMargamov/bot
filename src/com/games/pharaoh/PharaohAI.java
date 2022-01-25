@@ -9,6 +9,10 @@ import java.util.HashMap;
 
 public class PharaohAI extends BasePlayer {
 
+    public PharaohAI(String name) {
+        super(name);
+    }
+
     /**
      * Метод для выбора карты которой сходит бот
      *

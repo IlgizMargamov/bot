@@ -24,7 +24,7 @@ public class Main {
 
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-        worker = new ImageWorker();
+        //  worker = new ImageWorker();
         System.out.println(chooseHost);
         type = TypeOfCommunication.getType(Integer.parseInt(scanner.nextLine()));
         switch (type) {
