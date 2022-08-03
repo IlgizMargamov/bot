@@ -8,15 +8,27 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * Класс колоды*/
 public class Deck {
     private final List<CardImpl> Cards;
 
+    /**
+     * Создание колоды
+     * */
     public Deck(DeckType deckType) {
         int cardsCount = deckType.getCardsCount();
         Cards = getSortedDeck(cardsCount);
         shuffle(Cards);
     }
 
+    public int getSize(){ return Cards.size();}
+
+    /**
+     * Копирование колоды
+     *
+     * @param oldDeck колода для копирования
+     */
     public Deck(List<CardImpl> oldDeck){
         this.Cards = oldDeck;
         shuffle(this.Cards);
@@ -49,12 +61,20 @@ public class Deck {
         return cards;
     }
 
+    /**
+     * Выдать следующую карту
+     * @return следующая карта
+     */
     public CardImpl giveNext(){
         CardImpl card = Cards.get(Cards.size()-1);
         Cards.remove(Cards.size()-1);
         return card;
     }
 
+    /**
+     * Проверка на то, что колода не пустая
+     * @return истина, если пуста, иначе ложь
+     */
     public boolean isEmpty(){
         return Cards.size() == 0;
     }
